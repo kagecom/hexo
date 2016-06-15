@@ -10,7 +10,7 @@
 <meta http-equiv=”Cache-Control” content=”no-siteapp” />
 
 
-  <meta name="keywords" content=" ,machinelearing, " />
+  <meta name="keywords" content=" ,deeplearning, " />
 
 
 
@@ -49,7 +49,7 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.2" />
 
 
-  <title> 论文笔记及公式推导 《Supervised Discrete Hashing》 - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <title> 论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </head>
 
 <body>
@@ -188,7 +188,7 @@
           
           
             
-              论文笔记及公式推导 《Supervised Discrete Hashing》
+              论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding
             
           
         </h1>
@@ -196,7 +196,7 @@
 
       <div class="post-meta">
         <span class="post-time">
-          发表于 2016-05-31
+          发表于 2016-06-15
         </span>
 
         
@@ -205,8 +205,8 @@
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2016/05/31/notes-on-sdh/#comments" >
-              <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/31/notes-on-sdh/"></span>
+            <a href="/2016/06/15/notes-on-deep-compression/#comments" >
+              <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/15/notes-on-deep-compression/"></span>
             </a>
           </span>
           
@@ -220,50 +220,35 @@
       
 
       
-        <p>原论文提出了一种解离散哈希问题的最优化方法，推出其闭式解。<br>笔者在阅读该论文的过程中，理解公式推导的过程中遇到了一些问题，现在将论文公式推导的详细内容记录于此。</p>
-<p>原论文链接来自这里<br><a href="http://arxiv.org/pdf/1508.07148.pdf" target="_blank" rel="external">http://arxiv.org/pdf/1508.07148.pdf</a><br><a id="more"></a></p>
-<h2 id="定义最优化问题"><a href="#定义最优化问题" class="headerlink" title="定义最优化问题"></a>定义最优化问题</h2><p>对于$n$个样本的数据集$\mathbf{X}={\mathbf{x_i} }_i^n$, 我们要将其每个样本编码成$L$位的二进制码, $\mathbf{B}= { \mathbf{b_i} } _i^n \in {-1, 1 } ^{L \times n} $,即<br>$$ \mathbf{x_i}  \Rightarrow \mathbf{b_i} \in{-1, 1}^L $$</p>
-<p>一般做哈希问题需要利用类别信息，现定义一个线性多分类模型<br>$$ \mathbf{y} = G(\mathbf{b}) = \mathbf{W^ \top b} = [ \mathbf{ w_1^\top b, \cdots, w_C^\top b}]$$<br>其中 $w_k \in R ^ { L \times 1}  $ 是第 $k$ 类的参数向量，总共有$C$个类，$\mathbf{y}$是各个类别的激活值，最大值对应的类标即为该样本所属的类标。</p>
-<p>定义 <strong><em>Problem(1)</em></strong> 如下：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \sum_{i=1}^n L(\mathbf{y}_i,\mathbf{W^ \top }\mathbf{b}_i ）+ \lambda \lVert \mathbf{W} \rVert ^2  \\<br>\mbox{s.t.} \quad \mathbf{b}_i = \mbox{sgn} ( F ( \mathbf{x}_i)), i = 1, \cdots, n.$$<br>其中$F(\cdot) $是哈希函数，在接下来的讨论中还需要对它进行学习。$\lambda$ 和它所在的是正则化项。</p>
-<p>利用类似拉格朗日的方法，我们将<strong><em>Problem(1)</em></strong> 转化为<strong><em>Problem(2)</em></strong> ：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \sum_{i=1}^n L(\mathbf{y}_i,\mathbf{W^ \top }\mathbf{b}_i ）+ \lambda \lVert \mathbf{W} \rVert ^2 + v\sum_{i=1}^n \lVert \mathbf{b}_i - F(\mathbf{x}_i) \rVert ^2　\\<br>\mbox{s.t.} \quad \mathbf{b}_i \in {-1,1}^L$$<br>其中 $v$惩罚系数。上述最优化问题仍然是非凸的，但是我们可以利用类似coordinate descent的方法，固定其它变量，最优化某一变量，再更换另外的变量，以此迭代。</p>
-<h2 id="求解问题"><a href="#求解问题" class="headerlink" title="求解问题"></a>求解问题</h2><h3 id="对-F-mathbf-x-建模"><a href="#对-F-mathbf-x-建模" class="headerlink" title="对 $F(\mathbf{x})$ 建模"></a>对 $F(\mathbf{x})$ 建模</h3><p>这里可以采用任何适当的方法来构造$F(\mathbf{x})$， 原文采用核函数的方法：<br>$$ F(\mathbf{x}) = \mathbf{P}^\top \phi(\mathbf{x}) $$<br>其中<br>$$\phi(\mathbf{x}) = \left[ \begin{array}{c}<br>\mbox{exp}( \lVert \mathbf{x - a_1} \rVert / \sigma )\\<br>\vdots \\<br>\mbox{exp}( \lVert \mathbf{x - a_m} \rVert / \sigma )<br>\end{array} \right] $$<br>其中${ \mathbf{a}_j }_{j=1}^m$ 是从样本集合随机选取的中心点, $\mathbf{P} \in R^{m \times L} $是映射矩阵，也是参数矩阵。</p>
-<h3 id="求解-mathbf-P"><a href="#求解-mathbf-P" class="headerlink" title="求解$\mathbf{P}$"></a>求解$\mathbf{P}$</h3><p>原文中直接给出了 $\mathbf{P}$ 的闭式表达式，并没有推导过程，现将推导过程呈列如下：<br>上述最优化问题中的目标函数第一项和第二项与 $\mathbf{P}$ 没有任何关系，而系数 $v$ 也可以去掉，将<strong><em>Problem(2)</em></strong>重写如下：<br> $$ \min  \limits _{\mathbf{P}} \quad \sum_{i=1}^n \lVert \mathbf{b}_i - \mathbf{P}^\top \phi(\mathbf{x}_i) \rVert ^2　$$<br>这个问题等价于线性多分类问题，把这里的 $\mathbf{b}_i$ 看成ground-truth 标签, $\phi(\mathbf{x}_i)$ 是核映射过后的样本,  $\mathbf{P}$ 为参数矩阵.</p>
-<p>再把上述问题重写成矩阵形式如下:<br> $$ \min  \limits _{\mathbf{P}} \quad  \lVert  \mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}  \rVert ^2　$$</p>
-<p> 矩阵各个元素的平方和可以写成矩阵的迹的形式:</p>
-<p>  $$ \min  \limits _{\mathbf{P}} \quad \mbox{tr} ( (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B})^\top (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}) ) 　$$</p>
-<p>接下来对上述表达式关于 $\mathbf{P}$ 求导。</p>
-<p>$$ \begin{aligned} \nabla_\mathbf{P} J (\mathbf{P}) &amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B})^\top (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}) ) \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \phi(\mathbf{X})^\top \mathbf{P}  \mathbf{P}^\top \phi(\mathbf{X}) - \phi(\mathbf{X})^\top \mathbf{PB} - \mathbf{B^\top P^\top \phi(X)} + \mathbf{B^\top B}) \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \mathbf{\phi(X)^\top PP^\top \phi(X)}) - \mbox{tr}( \mathbf{\phi(X)^\top PB}) - \mbox{tr}( \mathbf{ B^\top P^\top \phi(X) } ) + \mbox{tr}( \mathbf{B^\top B} )  \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \mathbf{\phi(X)^\top PP^\top \phi(X)})  - 2\mbox{tr}( \mathbf{ B^\top P^\top \phi(X) } ) + \mbox{tr}( \mathbf{B^\top B} )  \right] \\<br>&amp;= \left[ \mathbf{\phi(X) \phi(X)^\top P + \phi(X) \phi(X)^\top P - 2\phi(X)B^\top} \right]<br> \end{aligned}$$<br>令上式等于0，解得：<br>$$ \mathbf{ P = (\phi(X) \phi(X)^\top )^{-1} \phi(X) B^\top} $$ </p>
-<p>这里对上式求导的过程做几点说明：</p>
-<ul>
-<li>矩阵的迹具有旋转不变性和转置不变性，上述推导中第三行到第四行中运行了此性质，</li>
-<li>矩阵迹的性质详情参考维基百科trace词条的内容<br> :<a href="https://en.wikipedia.org/wiki/Trace_(linear_algebra" target="_blank" rel="external">https://en.wikipedia.org/wiki/Trace_(linear_algebra</a>)</li>
-<li>矩阵的迹的求导过程中，普通函数求导的乘法法则在这里同样适用，上述推导中对第四行的第一项运用了该法则，即先对 $\mathbf{P}$ 求导，再对 $\mathbf{P^\top}$ 求导，第四行最三项与$\mathbf{P}$无关，求导直接丢弃。</li>
-<li>关于含有矩阵迹的求导的详细内容可以参考该讲义的内容 <a href="http://cal.cs.illinois.edu/~johannes/research/matrix%20calculus.pdf" target="_blank" rel="external">http://cal.cs.illinois.edu/~johannes/research/matrix%20calculus.pdf</a></li>
-<li>另外，普通矩阵的求导法则参见维基百科中matrix calculus词条的内容。<br><a href="https://en.wikipedia.org/wiki/Matrix_calculus" target="_blank" rel="external">https://en.wikipedia.org/wiki/Matrix_calculus</a></li>
-</ul>
-<h3 id="求解-mathbf-W"><a href="#求解-mathbf-W" class="headerlink" title="求解$\mathbf{W}$"></a>求解$\mathbf{W}$</h3><p>将上述<strong><em>Problem(2)</em></strong>重写成矩阵形式的<strong><em>Problem(3)</em></strong>：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \lVert \mathbf{Y - W^\top B} \rVert ^2 + \lambda \lVert \mathbf{W} \rVert ^2 + v \lVert \mathbf{B} - F(\mathbf{X}) \rVert ^2　\\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n}$$</p>
-<p>与求解$\mathbf{P}$同理，求得：<br>$$ \mathbf{W = (BB^\top + \lambda I )^{-1} BY^\top} $$</p>
-<h3 id="求解-mathbf-B"><a href="#求解-mathbf-B" class="headerlink" title="求解$\mathbf{B}$"></a>求解$\mathbf{B}$</h3><p>将<strong><em>Problem(3)</em></strong>展开，去掉与 $\mathbf{B}$ 无关的第二项，可以得到：<br>$$ \min  \limits _{\mathbf{B}} \quad \lVert \mathbf{Y} \rVert ^2 - 2\mbox{tr}( \mathbf{Y^\top W^\top B}) + \lVert \mathbf{W^\top B} \rVert ^2 + v ( \lVert \mathbf{B} \rVert ^2 - 2\mbox{tr}( \mathbf{B^\top F(X)} ) +  \lVert \mathbf{F(X)} \rVert ^2) \\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n}$$</p>
-<p>又可以写成<strong><em>Problem(4)</em></strong>：</p>
-<p>$$ \min  \limits _{\mathbf{B}} \quad  \lVert \mathbf{W^\top B} \rVert ^2  - 2\mbox{tr}( \mathbf{B^\top Q} ) \\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n} $$<br>其中$\mathbf{Q = WY } + vF(\mathbf{X})$</p>
-<p>对<strong><em>Problem(3)</em></strong>转化为<strong><em>Problem(4)</em></strong>做几点说明：</p>
-<ul>
-<li>$\lVert \mathbf{Y - W^\top B} \rVert ^2 = \lVert \mathbf{Y} \rVert ^2 - 2\mbox{tr}( \mathbf{Y^\top W^\top B}) + \lVert \mathbf{W^\top B} \rVert ^2$, 这里可以理解为完全平方公式。这里的模是Frobenius norm，即每个元素的平方和。原矩阵的每一个元素都可以拆成完全平方，再求和即为等号右边的情况。</li>
-<li>$\lVert \mathbf{B} \rVert ^2 = L \times n$, 每个元素都是正负1，平方都为1.</li>
-<li>去掉与 $\mathbf{B}$ 无关的项即可得到<strong><em>Problem(4)</em></strong></li>
-</ul>
+        <p>本文是ICLR 2016的best paper，链接如下：<a href="http://arxiv.org/abs/1510.00149" target="_blank" rel="external">http://arxiv.org/abs/1510.00149</a></p>
+<p>本文基于Song Han的前一篇paper： <a href="http://arxiv.org/abs/1506.02626" target="_blank" rel="external">Learning both weights and connections for efficient neural networks</a>, <strong><em>在不损失模型准确度的情况下</em></strong>， alexnet模型的压缩比从原来的9倍增加到35倍，VGG-16模型的压缩比从原来的13倍增加到49倍，使得将模型植入到微型的嵌入式设备变得可能。同时，运行速度快了3到4倍，能耗下降比为3到7倍。<br><a id="more"></a></p>
 <hr>
-<p>令 $\mathbf{z^\top}$ 为 $\mathbf{B}$ 的 $l$ 行,  $\mathbf{B}’$ 是 $\mathbf{B}$ 除掉 $\mathbf{z^\top}$ 一行的矩阵。同理，$\mathbf{q^\top , Q, Q’, v^\top , W, W’}$ 也是如此。<br><strong><em>Problem(4)</em></strong>的第一项：<br>$$ \begin{aligned}<br>\lVert \mathbf{W^\top B} \rVert ^2 &amp;= \mbox{tr}( \mathbf{ B^\top WW^\top B } ) \\<br>&amp;= const +  \lVert \mathbf{zv^\top } \rVert ^2 + 2 \mathbf{v^\top W’^\top B’ z} \\<br>&amp;= const + 2 \mathbf{v^\top W’^\top B’ z}<br>\end{aligned}$$</p>
-<p>这是原文的推导，笔者理解了半天愣是没理解，只能将自己理解的推导过程给出：<br>$$ \begin{aligned}<br>\lVert \mathbf{W^\top B} \rVert ^2 &amp;= \lVert \left[ \begin{array}{c}<br>\mathbf{W’} \\<br>\mathbf{v^\top}<br>\end{array} \right] ^\top<br>\left[ \begin{array}{c}<br>\mathbf{B’} \\<br>\mathbf{z^\top}<br>\end{array} \right] \rVert ^2 \\<br>&amp;= \lVert \mathbf{W’^\top B’ + vz^\top} \rVert ^2 \\<br>&amp;= \lVert \mathbf{W’^\top B’}  \rVert ^2  + \lVert \mathbf{vz^\top }  \rVert ^2 +  2 \mbox{tr}( \mathbf{zv^\top W’^\top B’} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2 \mbox{tr}( \mathbf{v^\top W’^\top B’ z} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2 \mbox{tr}( \mathbf{( W’v)^\top B’ z} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2  \mathbf{v^\top W’^\top B’ z}  \\<br>&amp;= const +  2  \mathbf{v^\top W’^\top B’ z}<br>\end{aligned}$$</p>
-<p>对上述推导做几点说明：</p>
+<p>压缩过程分成了3步，如下图:<br><img src="/resource/notes-on-deep-compression/1.jpg" alt="img"></p>
+<h2 id="1-剪枝"><a href="#1-剪枝" class="headerlink" title="1.剪枝"></a>1.剪枝</h2><p>剪枝即是<a href="http://arxiv.org/abs/1506.02626" target="_blank" rel="external">Learning both weights and connections for efficient neural networks</a>论文里的做法，剪枝后的参数矩阵将变成稀疏矩阵，采用compressed sparse row (CSR) or compressed sparse column (CSC) 的方式存储这些权值。<br>CSR 和 CSC 的存储方式参考Wiki百科的内容，<a href="https://en.wikipedia.org/wiki/Sparse_matrix" target="_blank" rel="external">https://en.wikipedia.org/wiki/Sparse_matrix</a> 这里转述该词条的例子如下：</p>
+<p><img src="/resource/notes-on-deep-compression/2.jpg" alt="img"></p>
 <ul>
-<li>由于求的是矩阵的模，不妨将 $\mathbf{W}$ 拆成上面的形式，即改变矩阵每一行的位置并不改变其模的大小，但是 $\mathbf{B}$ 也要做相应改变。</li>
-<li>第五行到第六行的推导中，$\mathbf{B’z}$ 是一个列向量，$\mathbf{W’v}$ 是跟其同维的列向量，那么 $\mathbf{( W’v)^\top B’ z}$ 就是一个标量，标量的迹就是它本身。</li>
-<li>$\lVert \mathbf{zv^\top }  \rVert ^2 = \mbox{tr}( \mathbf{ vz^\top zv^\top})  = n \mathbf{v^\top v} = const$</li>
+<li>$A$数组存储矩阵里的非0元素（按行顺序）</li>
+<li>$IA(i) = $ 截止到第$i$行非0元素的个数，$i$从第0开始，因此$IA(0) 一定是0$，此例中，$IA(1) = 0$，第一行没有非0元素。</li>
+<li>JA数组存储每一个非0元素所在的列号。</li>
+<li><p>因此总共需要$2a+n+1$个数据，其中$a$为非零元素的个数，$n$是行数或列数。</p>
+<p> 另外，为了进一步压缩，在$JA$数组中存储位置的差分，即该位置距离上一个数据的距离，这普遍存在在很多压缩算法中。对于conv层，每个数据的差分项用8 bits存储，fc层则使用5 bits.它们分别只能代表1~256，和1~32,则当差距超过这个范围时，则在最后的位置补一个0，如图所示：</p>
+</li>
 </ul>
-<hr>
-<p><strong><em>Problem(4)</em></strong>的第二项：</p>
-<p>$$ \begin{aligned}<br>\mbox{tr}(\mathbf{B^\top Q}) &amp;= \mbox{tr}( \mathbf{B’^\top Q’ + zq^\top} ) \\<br>&amp;= \mbox{tr}( \mathbf{B’^\top Q’}) + \mbox{tr}(zq^\top ) \\<br>&amp;= const + \mathbf{q^\top z}<br>\end{aligned}$$<br>因此，<strong><em>Problem(4)</em></strong>可以重写成<strong><em>Problem(5)</em></strong><br>$$ \min  \limits _{\mathbf{z}} \quad (\mathbf{ v^\top W’^\top B’ - q^\top }) \mathbf{z}   \\<br>\mbox{s.t.} \quad \mathbf{z} \in {-1,1}^{ n} $$<br>此问题为最小化问题，则其最优解为系数向量符号函数的相反数，即：<br>$$ z = \mbox{sgn}( \mathbf{q - B’^\top W’ v} ) $$</p>
+<p><img src="/resource/notes-on-deep-compression/3.jpg" alt="img"></p>
+<h2 id="2-量化与权值共享"><a href="#2-量化与权值共享" class="headerlink" title="2.量化与权值共享"></a>2.量化与权值共享</h2><p>这个步骤相当于k-means聚类，将网络的参数聚类成若干个权值，再用索引记录该权值。<br>对于CONV卷积层，论文中用8 bits索引一个权值（所以，总共有256个共享权值，即聚类中心），而对于FC全连接层，则使用5bits。作者通过这个方法，在AlexNet上能做到准确度完全不降。<br>这样该步骤能做到的压缩率为<br>$$r=\frac{nb}{nlog_2(k)+kb}$$<br>其中 $n$ 为连接权值的个数，$k$ 是聚类个数，代表某个聚类则需使用 $log_2(k)$ 个bits，每个权值用 $b$ 个bits表示。<br>文中给了一个例子，不同颜色表示不同的聚类，反向传播的时候也是如此。<br><img src="/resource/notes-on-deep-compression/4.jpg" alt="img"></p>
+<h3 id="聚类中心初始化"><a href="#聚类中心初始化" class="headerlink" title="聚类中心初始化"></a>聚类中心初始化</h3><p>聚类中心的初始化会影响聚类的效果，进而影响神经网络预测的准确度。</p>
+<ul>
+<li>随机初始化(Forgy initialization)：即随机选择ｋ个权值进行初始化。（蓝色点表示，集中在两个概率密度的尖峰）</li>
+<li>密度线性初始化(Density-based initialization )：在累积概率分布等间距取样ｋ个，找到相对应的初始化值进行初始化。（绿色点表示，比随机初始化更加集中）  </li>
+<li>线性初始化(Linear initialization)：在权值的分布范围内等间距选择ｋ个权值来初始化。（红色点表示）</li>
+</ul>
+<p><img src="/resource/notes-on-deep-compression/5.jpg" alt="img"></p>
+<pre><code>有论文指出，数值大的权值在神经网络中起的作用很大，但是这些大权值所占在比例少.
+因此，对于Forgy initialization和Density-based initialization 更难表示好这些大权值。
+实验结果也比较了这三种初始化方法的差异并证实了该论点。如图：
+</code></pre><p><img src="/resource/notes-on-deep-compression/6.jpg" alt="img"><br>     在压缩比一样的情况下，线性初始化跑出的结果略高于前两种初始化方式。</p>
+<h2 id="3-Huffman-编码"><a href="#3-Huffman-编码" class="headerlink" title="3.Huffman 编码"></a>3.Huffman 编码</h2><p>即Winzip，把上述压缩后的模型再用huffman压一遍。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文最大的贡献就是在不损失精度的情况下压缩网络，使得模型植入嵌主式系统变得可能，同时加快了运算速度，降低能耗。</p>
 
       
     </div>
@@ -315,7 +300,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/machinelearing/"> #machinelearing </a>
+            <a href="/tags/deeplearning/"> #deeplearning </a>
           
         </div>
       
@@ -324,13 +309,11 @@
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/06/05/notes-on-learing-weights-connections/">论文笔记 《Learning both weights and connections for efficient neural networks》</a>
-            
           </div>
 
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/05/25/notes-on-cnn/">论文笔记 notes on convolutional neural networks</a>
+              <a href="/2016/06/05/notes-on-learing-weights-connections/">论文笔记 《Learning both weights and connections for efficient neural networks》</a>
             
           </div>
         </div>
@@ -347,7 +330,7 @@
       <div class="comments" id="comments">
         
 
-<div class="ds-share" data-thread-key="2016/05/31/notes-on-sdh/" data-title="论文笔记及公式推导 《Supervised Discrete Hashing》" data-images="http://yoursite.com/2016/05/31/notes-on-sdh/" data-content="http://yoursite.com/2016/05/31/notes-on-sdh/" data-url="http://yoursite.com/2016/05/31/notes-on-sdh/">
+<div class="ds-share" data-thread-key="2016/06/15/notes-on-deep-compression/" data-title="论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding" data-images="http://yoursite.com/2016/06/15/notes-on-deep-compression/" data-content="http://yoursite.com/2016/06/15/notes-on-deep-compression/" data-url="http://yoursite.com/2016/06/15/notes-on-deep-compression/">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
         <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
@@ -361,8 +344,8 @@
  </div>
 
           <!-- 评论框 -->
-          <div class="ds-thread" data-thread-key="2016/05/31/notes-on-sdh/"
-               data-title="论文笔记及公式推导 《Supervised Discrete Hashing》" data-url="http://yoursite.com/2016/05/31/notes-on-sdh/">
+          <div class="ds-thread" data-thread-key="2016/06/15/notes-on-deep-compression/"
+               data-title="论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding" data-url="http://yoursite.com/2016/06/15/notes-on-deep-compression/">
           </div>
         
       </div>
@@ -449,7 +432,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义最优化问题"><span class="nav-text">定义最优化问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#求解问题"><span class="nav-text">求解问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对-F-mathbf-x-建模"><span class="nav-text">对 $F(\mathbf{x})$ 建模</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-P"><span class="nav-text">求解$\mathbf{P}$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-W"><span class="nav-text">求解$\mathbf{W}$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-B"><span class="nav-text">求解$\mathbf{B}$</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-剪枝"><span class="nav-text">1.剪枝</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-量化与权值共享"><span class="nav-text">2.量化与权值共享</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#聚类中心初始化"><span class="nav-text">聚类中心初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Huffman-编码"><span class="nav-text">3.Huffman 编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>

@@ -10,7 +10,7 @@
 <meta http-equiv=”Cache-Control” content=”no-siteapp” />
 
 
-  <meta name="keywords" content=" ,machinelearing, " />
+  <meta name="keywords" content=" ,deeplearning, " />
 
 
 
@@ -49,7 +49,7 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.2" />
 
 
-  <title> 论文笔记及公式推导 《Supervised Discrete Hashing》 - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <title> 论文笔记 《Learning both weights and connections for efficient neural networks》 - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </head>
 
 <body>
@@ -188,7 +188,7 @@
           
           
             
-              论文笔记及公式推导 《Supervised Discrete Hashing》
+              论文笔记 《Learning both weights and connections for efficient neural networks》
             
           
         </h1>
@@ -196,7 +196,7 @@
 
       <div class="post-meta">
         <span class="post-time">
-          发表于 2016-05-31
+          发表于 2016-06-05
         </span>
 
         
@@ -205,8 +205,8 @@
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2016/05/31/notes-on-sdh/#comments" >
-              <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/31/notes-on-sdh/"></span>
+            <a href="/2016/06/05/notes-on-learing-weights-connections/#comments" >
+              <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/05/notes-on-learing-weights-connections/"></span>
             </a>
           </span>
           
@@ -220,50 +220,20 @@
       
 
       
-        <p>原论文提出了一种解离散哈希问题的最优化方法，推出其闭式解。<br>笔者在阅读该论文的过程中，理解公式推导的过程中遇到了一些问题，现在将论文公式推导的详细内容记录于此。</p>
-<p>原论文链接来自这里<br><a href="http://arxiv.org/pdf/1508.07148.pdf" target="_blank" rel="external">http://arxiv.org/pdf/1508.07148.pdf</a><br><a id="more"></a></p>
-<h2 id="定义最优化问题"><a href="#定义最优化问题" class="headerlink" title="定义最优化问题"></a>定义最优化问题</h2><p>对于$n$个样本的数据集$\mathbf{X}={\mathbf{x_i} }_i^n$, 我们要将其每个样本编码成$L$位的二进制码, $\mathbf{B}= { \mathbf{b_i} } _i^n \in {-1, 1 } ^{L \times n} $,即<br>$$ \mathbf{x_i}  \Rightarrow \mathbf{b_i} \in{-1, 1}^L $$</p>
-<p>一般做哈希问题需要利用类别信息，现定义一个线性多分类模型<br>$$ \mathbf{y} = G(\mathbf{b}) = \mathbf{W^ \top b} = [ \mathbf{ w_1^\top b, \cdots, w_C^\top b}]$$<br>其中 $w_k \in R ^ { L \times 1}  $ 是第 $k$ 类的参数向量，总共有$C$个类，$\mathbf{y}$是各个类别的激活值，最大值对应的类标即为该样本所属的类标。</p>
-<p>定义 <strong><em>Problem(1)</em></strong> 如下：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \sum_{i=1}^n L(\mathbf{y}_i,\mathbf{W^ \top }\mathbf{b}_i ）+ \lambda \lVert \mathbf{W} \rVert ^2  \\<br>\mbox{s.t.} \quad \mathbf{b}_i = \mbox{sgn} ( F ( \mathbf{x}_i)), i = 1, \cdots, n.$$<br>其中$F(\cdot) $是哈希函数，在接下来的讨论中还需要对它进行学习。$\lambda$ 和它所在的是正则化项。</p>
-<p>利用类似拉格朗日的方法，我们将<strong><em>Problem(1)</em></strong> 转化为<strong><em>Problem(2)</em></strong> ：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \sum_{i=1}^n L(\mathbf{y}_i,\mathbf{W^ \top }\mathbf{b}_i ）+ \lambda \lVert \mathbf{W} \rVert ^2 + v\sum_{i=1}^n \lVert \mathbf{b}_i - F(\mathbf{x}_i) \rVert ^2　\\<br>\mbox{s.t.} \quad \mathbf{b}_i \in {-1,1}^L$$<br>其中 $v$惩罚系数。上述最优化问题仍然是非凸的，但是我们可以利用类似coordinate descent的方法，固定其它变量，最优化某一变量，再更换另外的变量，以此迭代。</p>
-<h2 id="求解问题"><a href="#求解问题" class="headerlink" title="求解问题"></a>求解问题</h2><h3 id="对-F-mathbf-x-建模"><a href="#对-F-mathbf-x-建模" class="headerlink" title="对 $F(\mathbf{x})$ 建模"></a>对 $F(\mathbf{x})$ 建模</h3><p>这里可以采用任何适当的方法来构造$F(\mathbf{x})$， 原文采用核函数的方法：<br>$$ F(\mathbf{x}) = \mathbf{P}^\top \phi(\mathbf{x}) $$<br>其中<br>$$\phi(\mathbf{x}) = \left[ \begin{array}{c}<br>\mbox{exp}( \lVert \mathbf{x - a_1} \rVert / \sigma )\\<br>\vdots \\<br>\mbox{exp}( \lVert \mathbf{x - a_m} \rVert / \sigma )<br>\end{array} \right] $$<br>其中${ \mathbf{a}_j }_{j=1}^m$ 是从样本集合随机选取的中心点, $\mathbf{P} \in R^{m \times L} $是映射矩阵，也是参数矩阵。</p>
-<h3 id="求解-mathbf-P"><a href="#求解-mathbf-P" class="headerlink" title="求解$\mathbf{P}$"></a>求解$\mathbf{P}$</h3><p>原文中直接给出了 $\mathbf{P}$ 的闭式表达式，并没有推导过程，现将推导过程呈列如下：<br>上述最优化问题中的目标函数第一项和第二项与 $\mathbf{P}$ 没有任何关系，而系数 $v$ 也可以去掉，将<strong><em>Problem(2)</em></strong>重写如下：<br> $$ \min  \limits _{\mathbf{P}} \quad \sum_{i=1}^n \lVert \mathbf{b}_i - \mathbf{P}^\top \phi(\mathbf{x}_i) \rVert ^2　$$<br>这个问题等价于线性多分类问题，把这里的 $\mathbf{b}_i$ 看成ground-truth 标签, $\phi(\mathbf{x}_i)$ 是核映射过后的样本,  $\mathbf{P}$ 为参数矩阵.</p>
-<p>再把上述问题重写成矩阵形式如下:<br> $$ \min  \limits _{\mathbf{P}} \quad  \lVert  \mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}  \rVert ^2　$$</p>
-<p> 矩阵各个元素的平方和可以写成矩阵的迹的形式:</p>
-<p>  $$ \min  \limits _{\mathbf{P}} \quad \mbox{tr} ( (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B})^\top (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}) ) 　$$</p>
-<p>接下来对上述表达式关于 $\mathbf{P}$ 求导。</p>
-<p>$$ \begin{aligned} \nabla_\mathbf{P} J (\mathbf{P}) &amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B})^\top (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}) ) \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \phi(\mathbf{X})^\top \mathbf{P}  \mathbf{P}^\top \phi(\mathbf{X}) - \phi(\mathbf{X})^\top \mathbf{PB} - \mathbf{B^\top P^\top \phi(X)} + \mathbf{B^\top B}) \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \mathbf{\phi(X)^\top PP^\top \phi(X)}) - \mbox{tr}( \mathbf{\phi(X)^\top PB}) - \mbox{tr}( \mathbf{ B^\top P^\top \phi(X) } ) + \mbox{tr}( \mathbf{B^\top B} )  \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \mathbf{\phi(X)^\top PP^\top \phi(X)})  - 2\mbox{tr}( \mathbf{ B^\top P^\top \phi(X) } ) + \mbox{tr}( \mathbf{B^\top B} )  \right] \\<br>&amp;= \left[ \mathbf{\phi(X) \phi(X)^\top P + \phi(X) \phi(X)^\top P - 2\phi(X)B^\top} \right]<br> \end{aligned}$$<br>令上式等于0，解得：<br>$$ \mathbf{ P = (\phi(X) \phi(X)^\top )^{-1} \phi(X) B^\top} $$ </p>
-<p>这里对上式求导的过程做几点说明：</p>
-<ul>
-<li>矩阵的迹具有旋转不变性和转置不变性，上述推导中第三行到第四行中运行了此性质，</li>
-<li>矩阵迹的性质详情参考维基百科trace词条的内容<br> :<a href="https://en.wikipedia.org/wiki/Trace_(linear_algebra" target="_blank" rel="external">https://en.wikipedia.org/wiki/Trace_(linear_algebra</a>)</li>
-<li>矩阵的迹的求导过程中，普通函数求导的乘法法则在这里同样适用，上述推导中对第四行的第一项运用了该法则，即先对 $\mathbf{P}$ 求导，再对 $\mathbf{P^\top}$ 求导，第四行最三项与$\mathbf{P}$无关，求导直接丢弃。</li>
-<li>关于含有矩阵迹的求导的详细内容可以参考该讲义的内容 <a href="http://cal.cs.illinois.edu/~johannes/research/matrix%20calculus.pdf" target="_blank" rel="external">http://cal.cs.illinois.edu/~johannes/research/matrix%20calculus.pdf</a></li>
-<li>另外，普通矩阵的求导法则参见维基百科中matrix calculus词条的内容。<br><a href="https://en.wikipedia.org/wiki/Matrix_calculus" target="_blank" rel="external">https://en.wikipedia.org/wiki/Matrix_calculus</a></li>
+        <p>做CNN模型压缩的，在ImageNet数据集分类效果不降的情况下，AlexNet模型参数能减少9倍，VGG-16模型参数能减少13倍。原文链接如下：<br><a href="http://arxiv.org/abs/1506.02626" target="_blank" rel="external">http://arxiv.org/abs/1506.02626</a><br><a id="more"></a></p>
+<h2 id="压缩步骤"><a href="#压缩步骤" class="headerlink" title="压缩步骤"></a>压缩步骤</h2><ol>
+<li>训练：按传统的CNN训练方法训练模型，可以将此过程看作学习节点之间的连接性（connectivity）。</li>
+<li>剪枝：将模型权值小于某个域值的连接直接去掉。</li>
+<li>重新训练：根据剪枝后的结构重新finetune CNN模型。</li>
+<li>迭代2-3步骤若干次。</li>
+</ol>
+<p>此过程如原论文中的图2所示：<br><img src="/resource/notes-on-learing-weights-connections/notes-on-learing-weights-connections_1.jpg" alt="img"><br>另外，论文给出了剪枝后的某一连接图：<br><img src="/resource/notes-on-learing-weights-connections/notes-on-learing-weights-connections_2.jpg" alt="img"></p>
+<h2 id="Details-amp-Tricks"><a href="#Details-amp-Tricks" class="headerlink" title="Details &amp; Tricks"></a>Details &amp; Tricks</h2><ul>
+<li>正则化项：采用 L2 正则化项比采用 L1 效果好。</li>
+<li>retraing 直接以前面train connectiviy中的参数初始化比重新初始化效果好。</li>
+<li>为了避免参数弥散（gradient vanish），在retrain FC层的时候固定CONV层，反之，retrain CONV层的时候固定FC层。</li>
+<li>dropout 参数调整公式如下<br> $$ C_i = N_iN_{i-1}, D_r=D_o \sqrt{\frac{C_{ir}}{C_{io}}} $$<br> 其中 $C_i$ 是第 $i$ 层网络的连接数，$N_i$ 是该层的神经元个数，$C_{ir}$ 是该层未剪枝前的连接数， $C_{ir}$是剪枝后的链接数。由左边的表达式，可以看出 $C_{i}$ 大致是关于 $N_i$ 的二次函数的关系，dropout rate是神经元置为0的概率，因此dropout rate的比例是连接数比值开根号的关系。</li>
 </ul>
-<h3 id="求解-mathbf-W"><a href="#求解-mathbf-W" class="headerlink" title="求解$\mathbf{W}$"></a>求解$\mathbf{W}$</h3><p>将上述<strong><em>Problem(2)</em></strong>重写成矩阵形式的<strong><em>Problem(3)</em></strong>：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \lVert \mathbf{Y - W^\top B} \rVert ^2 + \lambda \lVert \mathbf{W} \rVert ^2 + v \lVert \mathbf{B} - F(\mathbf{X}) \rVert ^2　\\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n}$$</p>
-<p>与求解$\mathbf{P}$同理，求得：<br>$$ \mathbf{W = (BB^\top + \lambda I )^{-1} BY^\top} $$</p>
-<h3 id="求解-mathbf-B"><a href="#求解-mathbf-B" class="headerlink" title="求解$\mathbf{B}$"></a>求解$\mathbf{B}$</h3><p>将<strong><em>Problem(3)</em></strong>展开，去掉与 $\mathbf{B}$ 无关的第二项，可以得到：<br>$$ \min  \limits _{\mathbf{B}} \quad \lVert \mathbf{Y} \rVert ^2 - 2\mbox{tr}( \mathbf{Y^\top W^\top B}) + \lVert \mathbf{W^\top B} \rVert ^2 + v ( \lVert \mathbf{B} \rVert ^2 - 2\mbox{tr}( \mathbf{B^\top F(X)} ) +  \lVert \mathbf{F(X)} \rVert ^2) \\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n}$$</p>
-<p>又可以写成<strong><em>Problem(4)</em></strong>：</p>
-<p>$$ \min  \limits _{\mathbf{B}} \quad  \lVert \mathbf{W^\top B} \rVert ^2  - 2\mbox{tr}( \mathbf{B^\top Q} ) \\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n} $$<br>其中$\mathbf{Q = WY } + vF(\mathbf{X})$</p>
-<p>对<strong><em>Problem(3)</em></strong>转化为<strong><em>Problem(4)</em></strong>做几点说明：</p>
-<ul>
-<li>$\lVert \mathbf{Y - W^\top B} \rVert ^2 = \lVert \mathbf{Y} \rVert ^2 - 2\mbox{tr}( \mathbf{Y^\top W^\top B}) + \lVert \mathbf{W^\top B} \rVert ^2$, 这里可以理解为完全平方公式。这里的模是Frobenius norm，即每个元素的平方和。原矩阵的每一个元素都可以拆成完全平方，再求和即为等号右边的情况。</li>
-<li>$\lVert \mathbf{B} \rVert ^2 = L \times n$, 每个元素都是正负1，平方都为1.</li>
-<li>去掉与 $\mathbf{B}$ 无关的项即可得到<strong><em>Problem(4)</em></strong></li>
-</ul>
-<hr>
-<p>令 $\mathbf{z^\top}$ 为 $\mathbf{B}$ 的 $l$ 行,  $\mathbf{B}’$ 是 $\mathbf{B}$ 除掉 $\mathbf{z^\top}$ 一行的矩阵。同理，$\mathbf{q^\top , Q, Q’, v^\top , W, W’}$ 也是如此。<br><strong><em>Problem(4)</em></strong>的第一项：<br>$$ \begin{aligned}<br>\lVert \mathbf{W^\top B} \rVert ^2 &amp;= \mbox{tr}( \mathbf{ B^\top WW^\top B } ) \\<br>&amp;= const +  \lVert \mathbf{zv^\top } \rVert ^2 + 2 \mathbf{v^\top W’^\top B’ z} \\<br>&amp;= const + 2 \mathbf{v^\top W’^\top B’ z}<br>\end{aligned}$$</p>
-<p>这是原文的推导，笔者理解了半天愣是没理解，只能将自己理解的推导过程给出：<br>$$ \begin{aligned}<br>\lVert \mathbf{W^\top B} \rVert ^2 &amp;= \lVert \left[ \begin{array}{c}<br>\mathbf{W’} \\<br>\mathbf{v^\top}<br>\end{array} \right] ^\top<br>\left[ \begin{array}{c}<br>\mathbf{B’} \\<br>\mathbf{z^\top}<br>\end{array} \right] \rVert ^2 \\<br>&amp;= \lVert \mathbf{W’^\top B’ + vz^\top} \rVert ^2 \\<br>&amp;= \lVert \mathbf{W’^\top B’}  \rVert ^2  + \lVert \mathbf{vz^\top }  \rVert ^2 +  2 \mbox{tr}( \mathbf{zv^\top W’^\top B’} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2 \mbox{tr}( \mathbf{v^\top W’^\top B’ z} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2 \mbox{tr}( \mathbf{( W’v)^\top B’ z} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2  \mathbf{v^\top W’^\top B’ z}  \\<br>&amp;= const +  2  \mathbf{v^\top W’^\top B’ z}<br>\end{aligned}$$</p>
-<p>对上述推导做几点说明：</p>
-<ul>
-<li>由于求的是矩阵的模，不妨将 $\mathbf{W}$ 拆成上面的形式，即改变矩阵每一行的位置并不改变其模的大小，但是 $\mathbf{B}$ 也要做相应改变。</li>
-<li>第五行到第六行的推导中，$\mathbf{B’z}$ 是一个列向量，$\mathbf{W’v}$ 是跟其同维的列向量，那么 $\mathbf{( W’v)^\top B’ z}$ 就是一个标量，标量的迹就是它本身。</li>
-<li>$\lVert \mathbf{zv^\top }  \rVert ^2 = \mbox{tr}( \mathbf{ vz^\top zv^\top})  = n \mathbf{v^\top v} = const$</li>
-</ul>
-<hr>
-<p><strong><em>Problem(4)</em></strong>的第二项：</p>
-<p>$$ \begin{aligned}<br>\mbox{tr}(\mathbf{B^\top Q}) &amp;= \mbox{tr}( \mathbf{B’^\top Q’ + zq^\top} ) \\<br>&amp;= \mbox{tr}( \mathbf{B’^\top Q’}) + \mbox{tr}(zq^\top ) \\<br>&amp;= const + \mathbf{q^\top z}<br>\end{aligned}$$<br>因此，<strong><em>Problem(4)</em></strong>可以重写成<strong><em>Problem(5)</em></strong><br>$$ \min  \limits _{\mathbf{z}} \quad (\mathbf{ v^\top W’^\top B’ - q^\top }) \mathbf{z}   \\<br>\mbox{s.t.} \quad \mathbf{z} \in {-1,1}^{ n} $$<br>此问题为最小化问题，则其最优解为系数向量符号函数的相反数，即：<br>$$ z = \mbox{sgn}( \mathbf{q - B’^\top W’ v} ) $$</p>
 
       
     </div>
@@ -315,7 +285,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/machinelearing/"> #machinelearing </a>
+            <a href="/tags/deeplearning/"> #deeplearning </a>
           
         </div>
       
@@ -324,13 +294,13 @@
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/06/05/notes-on-learing-weights-connections/">论文笔记 《Learning both weights and connections for efficient neural networks》</a>
+              <a href="/2016/06/15/notes-on-deep-compression/">论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding</a>
             
           </div>
 
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/05/25/notes-on-cnn/">论文笔记 notes on convolutional neural networks</a>
+              <a href="/2016/05/31/notes-on-sdh/">论文笔记及公式推导 《Supervised Discrete Hashing》</a>
             
           </div>
         </div>
@@ -347,7 +317,7 @@
       <div class="comments" id="comments">
         
 
-<div class="ds-share" data-thread-key="2016/05/31/notes-on-sdh/" data-title="论文笔记及公式推导 《Supervised Discrete Hashing》" data-images="http://yoursite.com/2016/05/31/notes-on-sdh/" data-content="http://yoursite.com/2016/05/31/notes-on-sdh/" data-url="http://yoursite.com/2016/05/31/notes-on-sdh/">
+<div class="ds-share" data-thread-key="2016/06/05/notes-on-learing-weights-connections/" data-title="论文笔记 《Learning both weights and connections for efficient neural networks》" data-images="http://yoursite.com/2016/06/05/notes-on-learing-weights-connections/" data-content="http://yoursite.com/2016/06/05/notes-on-learing-weights-connections/" data-url="http://yoursite.com/2016/06/05/notes-on-learing-weights-connections/">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
         <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
@@ -361,8 +331,8 @@
  </div>
 
           <!-- 评论框 -->
-          <div class="ds-thread" data-thread-key="2016/05/31/notes-on-sdh/"
-               data-title="论文笔记及公式推导 《Supervised Discrete Hashing》" data-url="http://yoursite.com/2016/05/31/notes-on-sdh/">
+          <div class="ds-thread" data-thread-key="2016/06/05/notes-on-learing-weights-connections/"
+               data-title="论文笔记 《Learning both weights and connections for efficient neural networks》" data-url="http://yoursite.com/2016/06/05/notes-on-learing-weights-connections/">
           </div>
         
       </div>
@@ -449,7 +419,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义最优化问题"><span class="nav-text">定义最优化问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#求解问题"><span class="nav-text">求解问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对-F-mathbf-x-建模"><span class="nav-text">对 $F(\mathbf{x})$ 建模</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-P"><span class="nav-text">求解$\mathbf{P}$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-W"><span class="nav-text">求解$\mathbf{W}$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-B"><span class="nav-text">求解$\mathbf{B}$</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#压缩步骤"><span class="nav-text">压缩步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Details-amp-Tricks"><span class="nav-text">Details & Tricks</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
