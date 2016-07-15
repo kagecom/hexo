@@ -10,7 +10,7 @@
 <meta http-equiv=”Cache-Control” content=”no-siteapp” />
 
 
-  <meta name="keywords" content=" ,machinelearing, " />
+  <meta name="keywords" content=" ,linux vim, " />
 
 
 
@@ -49,7 +49,7 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.2" />
 
 
-  <title> 论文笔记及公式推导 《Supervised Discrete Hashing》 - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <title> vim 插件快速配置及配置文件下载(含教程) - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </head>
 
 <body>
@@ -188,7 +188,7 @@
           
           
             
-              论文笔记及公式推导 《Supervised Discrete Hashing》
+              vim 插件快速配置及配置文件下载(含教程)
             
           
         </h1>
@@ -196,7 +196,7 @@
 
       <div class="post-meta">
         <span class="post-time">
-          发表于 2016-05-31
+          发表于 2016-07-15
         </span>
 
         
@@ -205,8 +205,8 @@
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2016/05/31/notes-on-sdh/#comments" >
-              <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/31/notes-on-sdh/"></span>
+            <a href="/2016/07/15/vim/#comments" >
+              <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/15/vim/"></span>
             </a>
           </span>
           
@@ -220,50 +220,37 @@
       
 
       
-        <p>原论文提出了一种解离散哈希问题的最优化方法，推出其闭式解。<br>笔者在阅读该论文的过程中，理解公式推导的过程中遇到了一些问题，现在将论文公式推导的详细内容记录于此。</p>
-<p>原论文链接来自这里<br><a href="http://arxiv.org/pdf/1508.07148.pdf" target="_blank" rel="external">http://arxiv.org/pdf/1508.07148.pdf</a><br><a id="more"></a></p>
-<h2 id="定义最优化问题"><a href="#定义最优化问题" class="headerlink" title="定义最优化问题"></a>定义最优化问题</h2><p>对于$n$个样本的数据集$\mathbf{X}={\mathbf{x_i} }_i^n$, 我们要将其每个样本编码成$L$位的二进制码, $\mathbf{B}= { \mathbf{b_i} } _i^n \in {-1, 1 } ^{L \times n} $,即<br>$$ \mathbf{x_i}  \Rightarrow \mathbf{b_i} \in{-1, 1}^L $$</p>
-<p>一般做哈希问题需要利用类别信息，现定义一个线性多分类模型<br>$$ \mathbf{y} = G(\mathbf{b}) = \mathbf{W^ \top b} = [ \mathbf{ w_1^\top b, \cdots, w_C^\top b}]$$<br>其中 $w_k \in R ^ { L \times 1}  $ 是第 $k$ 类的参数向量，总共有$C$个类，$\mathbf{y}$是各个类别的激活值，最大值对应的类标即为该样本所属的类标。</p>
-<p>定义 <strong><em>Problem(1)</em></strong> 如下：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \sum_{i=1}^n L(\mathbf{y}_i,\mathbf{W^ \top }\mathbf{b}_i ）+ \lambda \lVert \mathbf{W} \rVert ^2  \\<br>\mbox{s.t.} \quad \mathbf{b}_i = \mbox{sgn} ( F ( \mathbf{x}_i)), i = 1, \cdots, n.$$<br>其中$F(\cdot) $是哈希函数，在接下来的讨论中还需要对它进行学习。$\lambda$ 和它所在的是正则化项。</p>
-<p>利用类似拉格朗日的方法，我们将<strong><em>Problem(1)</em></strong> 转化为<strong><em>Problem(2)</em></strong> ：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \sum_{i=1}^n L(\mathbf{y}_i,\mathbf{W^ \top }\mathbf{b}_i ）+ \lambda \lVert \mathbf{W} \rVert ^2 + v\sum_{i=1}^n \lVert \mathbf{b}_i - F(\mathbf{x}_i) \rVert ^2　\\<br>\mbox{s.t.} \quad \mathbf{b}_i \in {-1,1}^L$$<br>其中 $v$惩罚系数。上述最优化问题仍然是非凸的，但是我们可以利用类似coordinate descent的方法，固定其它变量，最优化某一变量，再更换另外的变量，以此迭代。</p>
-<h2 id="求解问题"><a href="#求解问题" class="headerlink" title="求解问题"></a>求解问题</h2><h3 id="对-F-mathbf-x-建模"><a href="#对-F-mathbf-x-建模" class="headerlink" title="对 $F(\mathbf{x})$ 建模"></a>对 $F(\mathbf{x})$ 建模</h3><p>这里可以采用任何适当的方法来构造$F(\mathbf{x})$， 原文采用核函数的方法：<br>$$ F(\mathbf{x}) = \mathbf{P}^\top \phi(\mathbf{x}) $$<br>其中<br>$$\phi(\mathbf{x}) = \left[ \begin{array}{c}<br>\mbox{exp}( \lVert \mathbf{x - a_1} \rVert / \sigma )\\<br>\vdots \\<br>\mbox{exp}( \lVert \mathbf{x - a_m} \rVert / \sigma )<br>\end{array} \right] $$<br>其中${ \mathbf{a}_j }_{j=1}^m$ 是从样本集合随机选取的中心点, $\mathbf{P} \in R^{m \times L} $是映射矩阵，也是参数矩阵。</p>
-<h3 id="求解-mathbf-P"><a href="#求解-mathbf-P" class="headerlink" title="求解$\mathbf{P}$"></a>求解$\mathbf{P}$</h3><p>原文中直接给出了 $\mathbf{P}$ 的闭式表达式，并没有推导过程，现将推导过程呈列如下：<br>上述最优化问题中的目标函数第一项和第二项与 $\mathbf{P}$ 没有任何关系，而系数 $v$ 也可以去掉，将<strong><em>Problem(2)</em></strong>重写如下：<br> $$ \min  \limits _{\mathbf{P}} \quad \sum_{i=1}^n \lVert \mathbf{b}_i - \mathbf{P}^\top \phi(\mathbf{x}_i) \rVert ^2　$$<br>这个问题等价于线性多分类问题，把这里的 $\mathbf{b}_i$ 看成ground-truth 标签, $\phi(\mathbf{x}_i)$ 是核映射过后的样本,  $\mathbf{P}$ 为参数矩阵.</p>
-<p>再把上述问题重写成矩阵形式如下:<br> $$ \min  \limits _{\mathbf{P}} \quad  \lVert  \mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}  \rVert ^2　$$</p>
-<p> 矩阵各个元素的平方和可以写成矩阵的迹的形式:</p>
-<p>  $$ \min  \limits _{\mathbf{P}} \quad \mbox{tr} ( (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B})^\top (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}) ) 　$$</p>
-<p>接下来对上述表达式关于 $\mathbf{P}$ 求导。</p>
-<p>$$ \begin{aligned} \nabla_\mathbf{P} J (\mathbf{P}) &amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B})^\top (\mathbf{P}^\top \phi(\mathbf{X}) - \mathbf{B}) ) \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \phi(\mathbf{X})^\top \mathbf{P}  \mathbf{P}^\top \phi(\mathbf{X}) - \phi(\mathbf{X})^\top \mathbf{PB} - \mathbf{B^\top P^\top \phi(X)} + \mathbf{B^\top B}) \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \mathbf{\phi(X)^\top PP^\top \phi(X)}) - \mbox{tr}( \mathbf{\phi(X)^\top PB}) - \mbox{tr}( \mathbf{ B^\top P^\top \phi(X) } ) + \mbox{tr}( \mathbf{B^\top B} )  \right] \\<br>&amp;= \nabla_\mathbf{P} \left[ \mbox{tr} ( \mathbf{\phi(X)^\top PP^\top \phi(X)})  - 2\mbox{tr}( \mathbf{ B^\top P^\top \phi(X) } ) + \mbox{tr}( \mathbf{B^\top B} )  \right] \\<br>&amp;= \left[ \mathbf{\phi(X) \phi(X)^\top P + \phi(X) \phi(X)^\top P - 2\phi(X)B^\top} \right]<br> \end{aligned}$$<br>令上式等于0，解得：<br>$$ \mathbf{ P = (\phi(X) \phi(X)^\top )^{-1} \phi(X) B^\top} $$ </p>
-<p>这里对上式求导的过程做几点说明：</p>
-<ul>
-<li>矩阵的迹具有旋转不变性和转置不变性，上述推导中第三行到第四行中运行了此性质，</li>
-<li>矩阵迹的性质详情参考维基百科trace词条的内容<br> :<a href="https://en.wikipedia.org/wiki/Trace_(linear_algebra" target="_blank" rel="external">https://en.wikipedia.org/wiki/Trace_(linear_algebra</a>)</li>
-<li>矩阵的迹的求导过程中，普通函数求导的乘法法则在这里同样适用，上述推导中对第四行的第一项运用了该法则，即先对 $\mathbf{P}$ 求导，再对 $\mathbf{P^\top}$ 求导，第四行最三项与$\mathbf{P}$无关，求导直接丢弃。</li>
-<li>关于含有矩阵迹的求导的详细内容可以参考该讲义的内容 <a href="http://cal.cs.illinois.edu/~johannes/research/matrix%20calculus.pdf" target="_blank" rel="external">http://cal.cs.illinois.edu/~johannes/research/matrix%20calculus.pdf</a></li>
-<li>另外，普通矩阵的求导法则参见维基百科中matrix calculus词条的内容。<br><a href="https://en.wikipedia.org/wiki/Matrix_calculus" target="_blank" rel="external">https://en.wikipedia.org/wiki/Matrix_calculus</a></li>
-</ul>
-<h3 id="求解-mathbf-W"><a href="#求解-mathbf-W" class="headerlink" title="求解$\mathbf{W}$"></a>求解$\mathbf{W}$</h3><p>将上述<strong><em>Problem(2)</em></strong>重写成矩阵形式的<strong><em>Problem(3)</em></strong>：<br>$$ \min  \limits _{\mathbf{B,W},F} \quad \lVert \mathbf{Y - W^\top B} \rVert ^2 + \lambda \lVert \mathbf{W} \rVert ^2 + v \lVert \mathbf{B} - F(\mathbf{X}) \rVert ^2　\\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n}$$</p>
-<p>与求解$\mathbf{P}$同理，求得：<br>$$ \mathbf{W = (BB^\top + \lambda I )^{-1} BY^\top} $$</p>
-<h3 id="求解-mathbf-B"><a href="#求解-mathbf-B" class="headerlink" title="求解$\mathbf{B}$"></a>求解$\mathbf{B}$</h3><p>将<strong><em>Problem(3)</em></strong>展开，去掉与 $\mathbf{B}$ 无关的第二项，可以得到：<br>$$ \min  \limits _{\mathbf{B}} \quad \lVert \mathbf{Y} \rVert ^2 - 2\mbox{tr}( \mathbf{Y^\top W^\top B}) + \lVert \mathbf{W^\top B} \rVert ^2 + v ( \lVert \mathbf{B} \rVert ^2 - 2\mbox{tr}( \mathbf{B^\top F(X)} ) +  \lVert \mathbf{F(X)} \rVert ^2) \\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n}$$</p>
-<p>又可以写成<strong><em>Problem(4)</em></strong>：</p>
-<p>$$ \min  \limits _{\mathbf{B}} \quad  \lVert \mathbf{W^\top B} \rVert ^2  - 2\mbox{tr}( \mathbf{B^\top Q} ) \\<br>\mbox{s.t.} \quad \mathbf{B} \in {-1,1}^{L \times n} $$<br>其中$\mathbf{Q = WY } + vF(\mathbf{X})$</p>
-<p>对<strong><em>Problem(3)</em></strong>转化为<strong><em>Problem(4)</em></strong>做几点说明：</p>
-<ul>
-<li>$\lVert \mathbf{Y - W^\top B} \rVert ^2 = \lVert \mathbf{Y} \rVert ^2 - 2\mbox{tr}( \mathbf{Y^\top W^\top B}) + \lVert \mathbf{W^\top B} \rVert ^2$, 这里可以理解为完全平方公式。这里的模是Frobenius norm，即每个元素的平方和。原矩阵的每一个元素都可以拆成完全平方，再求和即为等号右边的情况。</li>
-<li>$\lVert \mathbf{B} \rVert ^2 = L \times n$, 每个元素都是正负1，平方都为1.</li>
-<li>去掉与 $\mathbf{B}$ 无关的项即可得到<strong><em>Problem(4)</em></strong></li>
-</ul>
+        <p><a href="https://github.com/yangyangwithgnu/use_vim_as_ide" target="_blank" rel="external">https://github.com/yangyangwithgnu/use_vim_as_ide</a><br>尊重原著，本人所配置的vim基本上是按照上面的教程做的。</p>
+<p>本着分享的精神，将本人自己的vim配置文件，包括.vimrc和.vim文件夹公布如下。<br>链接: <a href="http://pan.baidu.com/s/1slAaap3" target="_blank" rel="external">http://pan.baidu.com/s/1slAaap3</a> 密码: xs9a</p>
+<p>使用时只需复制到用户目录即可，省去了复杂的配置，包括各种插件，ctags文件的生成，youcompleteme的安装等等。<br>快速地配置vim。<br>按照本文的做法后，可以迅速地使vim变得强大。<br><a id="more"></a></p>
+<h3 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤:"></a>使用步骤:</h3><ol>
+<li>下载上述文件，解压</li>
+<li><p>将解压后的隐藏文件复制到用户目录里，如/home/user. 或者使用下面命令</p>
+<pre><code>cp -r myvim/.vim* ~
+</code></pre></li>
+<li><p>vim ~/.vimrc 打开配置文件，命令行模式下输入下面的命令安装好</p>
+<pre><code>:PluginInstall
+</code></pre></li>
+<li><p>如果提示ctags的错误，ubuntu用户请使用下面的命令安装</p>
+<pre><code>sudo apt-get install exuberant-ctags
+</code></pre></li>
+</ol>
 <hr>
-<p>令 $\mathbf{z^\top}$ 为 $\mathbf{B}$ 的 $l$ 行,  $\mathbf{B}’$ 是 $\mathbf{B}$ 除掉 $\mathbf{z^\top}$ 一行的矩阵。同理，$\mathbf{q^\top , Q, Q’, v^\top , W, W’}$ 也是如此。<br><strong><em>Problem(4)</em></strong>的第一项：<br>$$ \begin{aligned}<br>\lVert \mathbf{W^\top B} \rVert ^2 &amp;= \mbox{tr}( \mathbf{ B^\top WW^\top B } ) \\<br>&amp;= const +  \lVert \mathbf{zv^\top } \rVert ^2 + 2 \mathbf{v^\top W’^\top B’ z} \\<br>&amp;= const + 2 \mathbf{v^\top W’^\top B’ z}<br>\end{aligned}$$</p>
-<p>这是原文的推导，笔者理解了半天愣是没理解，只能将自己理解的推导过程给出：<br>$$ \begin{aligned}<br>\lVert \mathbf{W^\top B} \rVert ^2 &amp;= \lVert \left[ \begin{array}{c}<br>\mathbf{W’} \\<br>\mathbf{v^\top}<br>\end{array} \right] ^\top<br>\left[ \begin{array}{c}<br>\mathbf{B’} \\<br>\mathbf{z^\top}<br>\end{array} \right] \rVert ^2 \\<br>&amp;= \lVert \mathbf{W’^\top B’ + vz^\top} \rVert ^2 \\<br>&amp;= \lVert \mathbf{W’^\top B’}  \rVert ^2  + \lVert \mathbf{vz^\top }  \rVert ^2 +  2 \mbox{tr}( \mathbf{zv^\top W’^\top B’} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2 \mbox{tr}( \mathbf{v^\top W’^\top B’ z} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2 \mbox{tr}( \mathbf{( W’v)^\top B’ z} ) \\<br>&amp;= const + \lVert \mathbf{zv^\top }  \rVert ^2 + 2  \mathbf{v^\top W’^\top B’ z}  \\<br>&amp;= const +  2  \mathbf{v^\top W’^\top B’ z}<br>\end{aligned}$$</p>
-<p>对上述推导做几点说明：</p>
+<p>下面将本配置文件所包含的功能罗列如下(包括但不限于)，如果需要更复杂的功能，请访问上面所给的github链接或者自行找教程。</p>
 <ul>
-<li>由于求的是矩阵的模，不妨将 $\mathbf{W}$ 拆成上面的形式，即改变矩阵每一行的位置并不改变其模的大小，但是 $\mathbf{B}$ 也要做相应改变。</li>
-<li>第五行到第六行的推导中，$\mathbf{B’z}$ 是一个列向量，$\mathbf{W’v}$ 是跟其同维的列向量，那么 $\mathbf{( W’v)^\top B’ z}$ 就是一个标量，标量的迹就是它本身。</li>
-<li>$\lVert \mathbf{zv^\top }  \rVert ^2 = \mbox{tr}( \mathbf{ vz^\top zv^\top})  = n \mathbf{v^\top v} = const$</li>
+<li>按键: ;fl（注意，有逗号，下同）  速记file list，打开工程列表窗口</li>
+<li>按键: ;sl 速记symbol list，打开所有变量名，函数名等的窗口</li>
+<li>按键: ;bl 速记buffer list</li>
+<li>按键: ;sw 快速的在h头文件和cpp实现文件切换，会自动打开新文件。</li>
+<li>按键: ;fw ;bw 在buffer list中顺序和倒序切换文件</li>
+<li>按键: ;jd ;jc分别跳转到定义和声明，jd自动跳转，<ctrl-o>跳回，跨文件跳转比较复杂，没配。</ctrl-o></li>
+<li>自动匹配括号</li>
+<li>代码模板，如输入if,再按;<tab>输入模板，再按;<tab>切换</tab></tab></li>
+<li>自动补全 路径,函数,变量名,头文件,标准库文件的函数库等</li>
+<li>其他细节配置请参考.vimrc配置文件</li>
 </ul>
-<hr>
-<p><strong><em>Problem(4)</em></strong>的第二项：</p>
-<p>$$ \begin{aligned}<br>\mbox{tr}(\mathbf{B^\top Q}) &amp;= \mbox{tr}( \mathbf{B’^\top Q’ + zq^\top} ) \\<br>&amp;= \mbox{tr}( \mathbf{B’^\top Q’}) + \mbox{tr}(zq^\top ) \\<br>&amp;= const + \mathbf{q^\top z}<br>\end{aligned}$$<br>因此，<strong><em>Problem(4)</em></strong>可以重写成<strong><em>Problem(5)</em></strong><br>$$ \min  \limits _{\mathbf{z}} \quad (\mathbf{ v^\top W’^\top B’ - q^\top }) \mathbf{z}   \\<br>\mbox{s.t.} \quad \mathbf{z} \in {-1,1}^{ n} $$<br>此问题为最小化问题，则其最优解为系数向量符号函数的相反数，即：<br>$$ z = \mbox{sgn}( \mathbf{q - B’^\top W’ v} ) $$</p>
+<p>如有意问，请邮件联系 jikai_chen@163.com</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br></pre></td><td class="code"><pre><span class="line">noremap &lt;C-J&gt;  &lt;C-W&gt;j</span><br><span class="line">noremap &lt;C-K&gt;    &lt;C-W&gt;k</span><br><span class="line">noremap &lt;C-H&gt;  &lt;C-W&gt;h</span><br><span class="line">noremap &lt;C-L&gt; &lt;C-W&gt;l</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">" 让配置变更立即生效</span><br><span class="line">autocmd BufWritePost $MYVIMRC source $MYVIMRC</span><br><span class="line">" 定义快捷键的前缀，即&lt;Leader&gt;，默认为"\"</span><br><span class="line">let mapleader=";"</span><br><span class="line"></span><br><span class="line">" 开启文件类型侦测</span><br><span class="line">filetype on</span><br><span class="line">" 根据侦测到的文件类型加载对应的插件</span><br><span class="line">filetype plugin on</span><br><span class="line"></span><br><span class="line">" 配色方案</span><br><span class="line">" set background=light</span><br><span class="line">set t_Co=256</span><br><span class="line">colorscheme molokai</span><br><span class="line">" 设置状态栏主题风格</span><br><span class="line">let g:Powerline_colorscheme='solarized256'</span><br><span class="line"></span><br><span class="line">" 开启实时搜索功能</span><br><span class="line">set incsearch</span><br><span class="line">" 搜索时大小写不敏感</span><br><span class="line">set ignorecase</span><br><span class="line">" 关闭兼容模式</span><br><span class="line">set nocompatible</span><br><span class="line">" vim 自身命令行模式智能补全</span><br><span class="line">set wildmenu</span><br><span class="line">" 总是显示状态栏</span><br><span class="line">set laststatus=2</span><br><span class="line">" 显示光标当前位置</span><br><span class="line">set ruler</span><br><span class="line">" 显示行号</span><br><span class="line">set number</span><br><span class="line">" 高亮显示当前行/列</span><br><span class="line">set cursorline</span><br><span class="line">" set cursorcolumn</span><br><span class="line">" 高亮显示搜索结果</span><br><span class="line">set hlsearch</span><br><span class="line">" 开启语法高亮功能</span><br><span class="line">syntax enable</span><br><span class="line">" 允许用指定语法高亮配色方案替换默认方案</span><br><span class="line">syntax on</span><br><span class="line">" 自适应不同语言的智能缩进</span><br><span class="line">filetype indent on</span><br><span class="line">" 将制表符扩展为空格</span><br><span class="line">set expandtab</span><br><span class="line">" 设置编辑时制表符占用空格数</span><br><span class="line">set tabstop=4</span><br><span class="line">" 设置格式化时制表符占用空格数</span><br><span class="line">set shiftwidth=4</span><br><span class="line">" 让 vim 把连续数量的空格视为一个制表符</span><br><span class="line">set softtabstop=4</span><br><span class="line">" 随 vim 自启动</span><br><span class="line">" let g:indent_guides_enable_on_vim_startup=1</span><br><span class="line">" 从第二层开始可视化显示缩进</span><br><span class="line">let g:indent_guides_start_level=2</span><br><span class="line">" 色块宽度</span><br><span class="line">let g:indent_guides_guide_size=1</span><br><span class="line">" 快捷键 i 开/关缩进可视化</span><br><span class="line">:nmap &lt;silent&gt; &lt;Leader&gt;i &lt;Plug&gt;IndentGuidesToggle</span><br><span class="line">" 基于缩进或语法进行代码折叠</span><br><span class="line">"set foldmethod=indent</span><br><span class="line">set foldmethod=syntax</span><br><span class="line">" 启动 vim 时关闭折叠代码</span><br><span class="line">set nofoldenable</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">" vundle 环境设置</span><br><span class="line">filetype off</span><br><span class="line">set rtp+=~/.vim/bundle/Vundle.vim</span><br><span class="line">" vundle 管理的插件列表必须位于 vundle#begin() 和 vundle#end() 之间</span><br><span class="line">call vundle#begin()</span><br><span class="line">Plugin 'VundleVim/Vundle.vim'</span><br><span class="line">Plugin 'scrooloose/nerdcommenter'</span><br><span class="line">Plugin 'altercation/vim-colors-solarized'</span><br><span class="line">Plugin 'tomasr/molokai'</span><br><span class="line">Plugin 'Lokaltog/vim-powerline'</span><br><span class="line">Plugin 'octol/vim-cpp-enhanced-highlight'</span><br><span class="line">Plugin 'nathanaelkane/vim-indent-guides'</span><br><span class="line">Plugin 'scrooloose/nerdtree'</span><br><span class="line">Plugin 'fholgado/minibufexpl.vim'</span><br><span class="line">Plugin 'Valloric/YouCompleteMe'</span><br><span class="line">Plugin 'majutsushi/tagbar'</span><br><span class="line">Plugin 'SirVer/ultisnips'</span><br><span class="line">Plugin 'jiangmiao/auto-pairs'</span><br><span class="line">Plugin 'derekwyatt/vim-fswitch'</span><br><span class="line">cal  vundle#end()</span><br><span class="line">filetype plugin indent on</span><br><span class="line"></span><br><span class="line">" *.cpp 和 *.h 间切换</span><br><span class="line">nmap &lt;silent&gt; &lt;Leader&gt;sw :FSHere&lt;cr&gt;</span><br><span class="line"></span><br><span class="line">let g:UltiSnipsSnippetDirectories=["mysnippets"] </span><br><span class="line">let g:UltiSnipsExpandTrigger="&lt;leader&gt;&lt;tab&gt;"</span><br><span class="line">let g:UltiSnipsJumpForwardTrigger="&lt;leader&gt;&lt;tab&gt;"</span><br><span class="line">let g:UltiSnipsJumpBackwardTrigger="&lt;leader&gt;&lt;s-tab&gt;"</span><br><span class="line"></span><br><span class="line">" 设置 tagbar 子窗口的位置出现在主编辑区的左边 </span><br><span class="line">let tagbar_right=1 </span><br><span class="line">" 设置显示／隐藏标签列表子窗口的快捷键。速记：symbol list</span><br><span class="line">nnoremap &lt;Leader&gt;sl :TagbarToggle&lt;CR&gt; </span><br><span class="line">" 设置标签子窗口的宽度 </span><br><span class="line">let tagbar_width=20</span><br><span class="line">" tagbar 子窗口中不显示冗余帮助信息 </span><br><span class="line">let g:tagbar_compact=1</span><br><span class="line">" 设置 ctags 对哪些代码标识符生成标签</span><br><span class="line">let g:tagbar_type_cpp = &#123;</span><br><span class="line">    \ 'kinds' : [</span><br><span class="line">         \ 'c:classes:0:1',</span><br><span class="line">         \ 'd:macros:0:1',</span><br><span class="line">         \ 'e:enumerators:0:0', </span><br><span class="line">         \ 'f:functions:0:1',</span><br><span class="line">         \ 'g:enumeration:0:1',</span><br><span class="line">         \ 'l:local:0:1',</span><br><span class="line">         \ 'm:members:0:1',</span><br><span class="line">         \ 'n:namespaces:0:1',</span><br><span class="line">         \ 'p:functions_prototypes:0:1',</span><br><span class="line">         \ 's:structs:0:1',</span><br><span class="line">         \ 't:typedefs:0:1',</span><br><span class="line">         \ 'u:unions:0:1',</span><br><span class="line">         \ 'v:global:0:1',</span><br><span class="line">         \ 'x:external:0:1'</span><br><span class="line">     \ ],</span><br><span class="line">     \ 'sro'        : '::',</span><br><span class="line">     \ 'kind2scope' : &#123;</span><br><span class="line">         \ 'g' : 'enum',</span><br><span class="line">         \ 'n' : 'namespace',</span><br><span class="line">         \ 'c' : 'class',</span><br><span class="line">         \ 's' : 'struct',</span><br><span class="line">         \ 'u' : 'union'</span><br><span class="line">     \ &#125;,</span><br><span class="line">     \ 'scope2kind' : &#123;</span><br><span class="line">         \ 'enum'      : 'g',</span><br><span class="line">         \ 'namespace' : 'n',</span><br><span class="line">         \ 'class'     : 'c',</span><br><span class="line">         \ 'struct'    : 's',</span><br><span class="line">         \ 'union'     : 'u'</span><br><span class="line">     \ &#125;</span><br><span class="line">\ &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">" 使用 NERDTree 插件查看工程文件。设置快捷键，速记：file list</span><br><span class="line">nmap &lt;Leader&gt;fl :NERDTreeToggle&lt;CR&gt;</span><br><span class="line">" 设置NERDTree子窗口宽度</span><br><span class="line">let NERDTreeWinSize=20</span><br><span class="line">" 设置NERDTree子窗口位置</span><br><span class="line">let NERDTreeWinPos="left"</span><br><span class="line">" 显示隐藏文件</span><br><span class="line">let NERDTreeShowHidden=1</span><br><span class="line">" NERDTree 子窗口中不显示冗余帮助信息</span><br><span class="line">let NERDTreeMinimalUI=1</span><br><span class="line">" 删除文件时自动删除文件对应 buffer</span><br><span class="line">let NERDTreeAutoDeleteBuffer=1</span><br><span class="line"></span><br><span class="line">" 显示/隐藏 MiniBufExplorer 窗口.设置快捷键，速度：buffer list</span><br><span class="line">map &lt;Leader&gt;bl :MBEToggle&lt;cr&gt;</span><br><span class="line">" buffer 切换快捷键</span><br><span class="line">noremap &lt;C-TAB&gt; :MBEbn&lt;CR&gt;</span><br><span class="line">noremap &lt;C-S-TAB&gt; :MBEbp&lt;CR&gt;</span><br><span class="line">noremap &lt;Leader&gt;fw :MBEbn&lt;CR&gt;</span><br><span class="line">noremap &lt;Leader&gt;bw :MBEbp&lt;CR&gt;</span><br><span class="line"></span><br><span class="line">" YCM 补全菜单配色</span><br><span class="line">" 菜单</span><br><span class="line">" highlight Pmenu ctermfg=2 ctermbg=3 guifg=#005f87 guibg=#EEE8D5</span><br><span class="line">" 选中项</span><br><span class="line">" highlight PmenuSel ctermfg=2 ctermbg=3 guifg=#AFD700 guibg=#106900</span><br><span class="line">let g:ycm_global_ycm_extra_conf='~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'</span><br><span class="line">" 补全功能在注释中同样有效</span><br><span class="line">let g:ycm_complete_in_comments=1</span><br><span class="line">" 允许 vim 加载 .ycm_extra_conf.py 文件，不再提示</span><br><span class="line">let g:ycm_confirm_extra_conf=0</span><br><span class="line">" 开启 YCM 标签补全引擎</span><br><span class="line">let g:ycm_collect_identifiers_from_tags_files=1</span><br><span class="line">" 引入 C++ 标准库tags</span><br><span class="line">" set tags+=/data/misc/software/misc./vim/stdcpp.tags</span><br><span class="line">set tags+=~/.vim/stdcpp.tags</span><br><span class="line">set tags+=~/.vim/sys_tags</span><br><span class="line">" YCM 集成 OmniCppComplete 补全引擎，设置其快捷键</span><br><span class="line">inoremap &lt;leader&gt;; &lt;C-x&gt;&lt;C-o&gt;</span><br><span class="line">" 补全内容不以分割子窗口形式出现，只显示补全列表</span><br><span class="line">set completeopt-=preview</span><br><span class="line">" 从第一个键入字符就开始罗列匹配项</span><br><span class="line">let g:ycm_min_num_of_chars_for_completion=1</span><br><span class="line">" 禁止缓存匹配项，每次都重新生成匹配项</span><br><span class="line">let g:ycm_cache_omnifunc=0</span><br><span class="line">" 语法关键字补全         </span><br><span class="line">let g:ycm_seed_identifiers_with_syntax=1</span><br><span class="line"></span><br><span class="line">nnoremap &lt;leader&gt;jc :YcmCompleter GoToDeclaration&lt;CR&gt;</span><br><span class="line">" 只能是 #include 或已打开的文件</span><br><span class="line">nnoremap &lt;leader&gt;jd :YcmCompleter GoToDefinition&lt;CR&gt;</span><br><span class="line">nnoremap gd :YcmCompleter GoTo&lt;CR&gt;</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -315,7 +302,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/machinelearing/"> #machinelearing </a>
+            <a href="/tags/linux-vim/"> #linux vim </a>
           
         </div>
       
@@ -324,13 +311,11 @@
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/06/05/notes-on-learing-weights-connections/">论文笔记 《Learning both weights and connections for efficient neural networks》</a>
-            
           </div>
 
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/05/25/notes-on-cnn/">论文笔记 notes on convolutional neural networks</a>
+              <a href="/2016/06/15/notes-on-deep-compression/">论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding</a>
             
           </div>
         </div>
@@ -347,7 +332,7 @@
       <div class="comments" id="comments">
         
 
-<div class="ds-share" data-thread-key="2016/05/31/notes-on-sdh/" data-title="论文笔记及公式推导 《Supervised Discrete Hashing》" data-images="http://yoursite.com/2016/05/31/notes-on-sdh/" data-content="http://yoursite.com/2016/05/31/notes-on-sdh/" data-url="http://yoursite.com/2016/05/31/notes-on-sdh/">
+<div class="ds-share" data-thread-key="2016/07/15/vim/" data-title="vim 插件快速配置及配置文件下载(含教程)" data-images="http://yoursite.com/2016/07/15/vim/" data-content="http://yoursite.com/2016/07/15/vim/" data-url="http://yoursite.com/2016/07/15/vim/">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
         <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
@@ -361,8 +346,8 @@
  </div>
 
           <!-- 评论框 -->
-          <div class="ds-thread" data-thread-key="2016/05/31/notes-on-sdh/"
-               data-title="论文笔记及公式推导 《Supervised Discrete Hashing》" data-url="http://yoursite.com/2016/05/31/notes-on-sdh/">
+          <div class="ds-thread" data-thread-key="2016/07/15/vim/"
+               data-title="vim 插件快速配置及配置文件下载(含教程)" data-url="http://yoursite.com/2016/07/15/vim/">
           </div>
         
       </div>
@@ -449,7 +434,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义最优化问题"><span class="nav-text">定义最优化问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#求解问题"><span class="nav-text">求解问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对-F-mathbf-x-建模"><span class="nav-text">对 $F(\mathbf{x})$ 建模</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-P"><span class="nav-text">求解$\mathbf{P}$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-W"><span class="nav-text">求解$\mathbf{W}$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求解-mathbf-B"><span class="nav-text">求解$\mathbf{B}$</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用步骤"><span class="nav-text">使用步骤:</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
