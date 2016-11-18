@@ -10,7 +10,7 @@
 <meta http-equiv=”Cache-Control” content=”no-siteapp” />
 
 
-  <meta name="keywords" content=" ,linux,vim, " />
+  <meta name="keywords" content=" ,RL, " />
 
 
 
@@ -49,7 +49,7 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.2" />
 
 
-  <title> vim 插件快速配置及配置文件下载(含教程) - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <title> 论文笔记 Human-Level control through deep reinforcement learning - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </head>
 
 <body>
@@ -188,7 +188,7 @@
           
           
             
-              vim 插件快速配置及配置文件下载(含教程)
+              论文笔记 Human-Level control through deep reinforcement learning
             
           
         </h1>
@@ -196,7 +196,7 @@
 
       <div class="post-meta">
         <span class="post-time">
-          发表于 2016-07-15
+          发表于 2016-11-18
         </span>
 
         
@@ -205,8 +205,8 @@
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2016/07/15/vim/#comments" >
-              <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/15/vim/"></span>
+            <a href="/2016/11/18/notes-on-atari/#comments" >
+              <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/18/notes-on-atari/"></span>
             </a>
           </span>
           
@@ -220,36 +220,67 @@
       
 
       
-        <p><a href="https://github.com/yangyangwithgnu/use_vim_as_ide" target="_blank" rel="external">https://github.com/yangyangwithgnu/use_vim_as_ide</a><br>尊重原著，本人所配置的vim基本上是按照上面的教程做的。</p>
-<p>本着分享的精神，将本人自己的vim配置文件，包括.vimrc和.vim文件夹公布如下。<br>链接: <a href="http://pan.baidu.com/s/1slAaap3" target="_blank" rel="external">http://pan.baidu.com/s/1slAaap3</a> 密码: xs9a</p>
-<p>使用时只需复制到用户目录即可，省去了复杂的配置，包括各种插件，ctags文件的生成，youcompleteme的安装等等。<br>快速地配置vim。<br>按照本文的做法后，可以迅速地使vim变得强大。<br><a id="more"></a></p>
-<h3 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤:"></a>使用步骤:</h3><ol>
-<li>下载上述文件，解压</li>
-<li><p>将解压后的隐藏文件复制到用户目录里，如/home/user. 或者使用下面命令</p>
-<pre><code>cp -r myvim/.vim* ~
-</code></pre></li>
-<li><p>vim ~/.vimrc 打开配置文件，命令行模式下输入下面的命令安装好</p>
-<pre><code>:PluginInstall
-</code></pre></li>
-<li><p>如果提示ctags的错误，ubuntu用户请使用下面的命令安装</p>
-<pre><code>sudo apt-get install exuberant-ctags
-</code></pre></li>
-</ol>
-<hr>
-<p>下面将本配置文件所包含的功能罗列如下(包括但不限于)，如果需要更复杂的功能，请访问上面所给的github链接或者自行找教程。</p>
+        <p>这篇文章被誉为deep RL的开山鼻祖, 往往被称为DQN(deep Q network), 是deepmind发表在nature的文章,<br>以Atari游戏做为背景, 运用增强学习和深度学习的方法, 训练出自动玩Atari游戏的人工智能系统, 并在多个游戏里玩得比专业玩家好.<br>贴出文章链接 <a href="http://www.nature.com/nature/journal/v518/n7540/abs/nature14236.html" target="_blank" rel="external">http://www.nature.com/nature/journal/v518/n7540/abs/nature14236.html</a></p>
+<a id="more"></a>
+<h3 id="Reinforcement-learning-基本概念"><a href="#Reinforcement-learning-基本概念" class="headerlink" title="Reinforcement learning 基本概念"></a>Reinforcement learning 基本概念</h3><blockquote>
 <ul>
-<li>按键: ;fl（注意，有分号，下同）  速记file list，打开工程列表窗口</li>
-<li>按键: ;sl 速记symbol list，打开所有变量名，函数名等的窗口</li>
-<li>按键: ;bl 速记buffer list</li>
-<li>按键: ;sw 快速的在h头文件和cpp实现文件切换，会自动打开新文件。</li>
-<li>按键: ;fw ;bw 在buffer list中顺序和倒序切换文件</li>
-<li>按键: ;jd ;jc分别跳转到定义和声明，jd自动跳转，<ctrl-o>跳回，跨文件跳转比较复杂，没配。</ctrl-o></li>
-<li>自动匹配括号</li>
-<li>代码模板，如输入if,再按;<tab>输入模板，再按;<tab>切换</tab></tab></li>
-<li><strong>自动补全 路径,函数,变量名,头文件,标准库文件的函数库等</strong></li>
-<li>其他细节配置请参考.vimrc配置文件</li>
+<li>agent: 可理解为模拟作出决策的主体, 也就是人工智能的主体.</li>
+<li>environment: 环境, 接受agent作出的action, 并反馈给agent收益和下一个状态.</li>
+<li>policy: 可通俗地理解成策略, 就是根据所当前状态 $s$ 采取某一特定行为(action) $a$ 的策略, 它是一个从 $s$ 到 $a$ 的映射. </li>
+<li>reward: 可通俗地理解为收益,　就是采取 $a$ 之后environment反馈给agent的收益. agent的目标就是要最大化长期收益(future reward)</li>
+<li>value function: 是处于当前状态 $s$ 对取得的长期收益的估计, 记为$v(s)$. 另外, 采取 $a$ 之后取得的长期收益的估计, 记为 $Q(s,a)$ </li>
+<li>$\epsilon$ greedy: 就是在当前状态 $s$ 下, 以$(1-\epsilon)$的概率选择在当前估计下最优的action, 以 即$a_t=argmax_aQ(s, a)$, 以 $\epsilon$的概率均等地从剩下的所有actions随机选取一个.</li>
+<li>episode: 从初始状态开始, 直到终止状态的一次模拟过程称为一次episode.</li>
 </ul>
-<p>如有疑问，请邮件联系 jikai_chen@163.com</p>
+</blockquote>
+<h3 id="模拟流程"><a href="#模拟流程" class="headerlink" title="模拟流程"></a>模拟流程</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Agent-&gt;Environment: selects an action  </span><br><span class="line">Environment--&gt;Agent: modify the game state and give the score</span><br></pre></td></tr></table></figure>
+<p>agent根据当前的状态 $s$, 运用自己的 policy 从 action sets 里面选择一个 $a_t$, 然后模拟的环境就会反馈给 agent 新的游戏状态, 并给出当前的reward $r_t$<br>这是经典的agent与environment交互的模型.<br>通过模拟, 我们可以得到四元组 $e_t = (s_t, a_t, r_t, s_{t+1})$, 并将这些四元组储存起来 $D_t={e_1,\dots,e_t}$</p>
+<h2 id="Atari-游戏场景代入reinforcement-learning-模型"><a href="#Atari-游戏场景代入reinforcement-learning-模型" class="headerlink" title="Atari 游戏场景代入reinforcement learning 模型"></a>Atari 游戏场景代入reinforcement learning 模型</h2><h4 id="输入"><a href="#输入" class="headerlink" title="输入:"></a>输入:</h4><ul>
+<li>从 Atari 游戏的一帧RGB图像提取出代表亮度(luminance)的 $Y$ 通道, 并resize成 $84\times84$, 将这样图像的连续 $m$帧作为输入, 论文里取$m=4$,即连续四帖图像作为游戏的输入信息.　<br>用函数$\phi$表示上面的预处理过程.</li>
+</ul>
+<h4 id="reward-r-的定义"><a href="#reward-r-的定义" class="headerlink" title="reward $r$ 的定义"></a>reward $r$ 的定义</h4><ul>
+<li>将在当前时间 $t$, 状态 $s$ 下采取行动 $a$ 之后游戏的分值变化取值为 $r_t$ ,即<br>$$r_t=<br>\begin{cases}<br>1&amp; 分数增加\\<br>0&amp; 分数不变\\<br>-1&amp; 分数减少<br>\end{cases}$$<blockquote>
+<ul>
+<li>好处:　不同游戏分数的数值尺度大小不一样,这样做能控制梯度的数值大小,防止数值越界,　同时在训练不同游戏时做到统一.</li>
+<li>坏处:　不能区分在同一游戏里获得分数或多或少的区别,比如分数多了100分跟多了10分是一样的</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h4 id="actions集合"><a href="#actions集合" class="headerlink" title="actions集合"></a>actions集合</h4><ul>
+<li>将Atari游戏的每一个按键作为 $a_i$</li>
+</ul>
+<h2 id="Reinforcement-learning-算法"><a href="#Reinforcement-learning-算法" class="headerlink" title="Reinforcement learning 算法"></a>Reinforcement learning 算法</h2><ul>
+<li><p>future rewards定义为:<br>$$R_t = \sum_{t^\prime=t}^T\gamma^{t^\prime - t} r_{t^\prime}$$<br>其中$\gamma$是discount factor, 论文中设置为0.99, $T$是终止的时间, $t$是当前的时间, future reward就是当前时间 $t$ 到终止时间 $T$ 的所有reward的和, 不过每一项要乘以指数衰减的系数$\gamma^{t^\prime - t}$</p>
+</li>
+<li><p>定义函数 $Q^\ast(s,a)$ 在当前状态 $s$ 下, 采取行为 $a$ 之后 最大化收益的期望<br>$$ Q^\ast(s,a) = max_\pi E [R_t|s_t=s,a_t=a,\pi] $$<br>其中$\pi$表示某一个 policy, 上式 $Q^\ast(s,a)$ 是表示采取了最优policy的收益, 即最大化收益的期望<br>根据Bellman equation, 上式可以改写成<br>$$Q^\ast(s,a) = E_{s^\prime}[r+\gamma max_{a^\prime} Q(s^\prime,a^\prime)|s,a]$$</p>
+<blockquote>
+<p>这个公式可以直观地理解为, 在当前状态 $s$ 采取 $a$ 的最大期望收益等于 采取$a$之后得到收益r, 再加上到达状态 $s^\prime$ 后采取 最优的 $a^\prime$ 得到最大期望收益的和. 相当于递归的思想.</p>
+</blockquote>
+</li>
+<li><p>现在用CNN卷积神经网络来近似或者学习 $Q^\ast(s,a)$, 即<br>$$Q(s,a;\theta) \approx Q^\ast(s,a) $$<br>$\theta$ 表示CNN的参数. 定义损失函数:<br>$$L(\theta) = (y - Q(s,a;\theta)) ^ 2$$<br>其中 $y=r+\gamma max_{a^\prime}Q^\ast(s^\prime, a^\prime) \approx r+\gamma max_{a^\prime}Q(s^\prime, a^\prime;\theta^-)$ 是上式bellman equation的结果. $\theta^-$ 表示前面若干次迭代前的CNN参数, 用 $\theta^-$ 代表的神经网络来估计或者说近似下一状态的 $Q^\ast(s^\prime,a^\prime)$, 这样处理能够防止过拟合.<br>这样就可以通过CNN的反向求导法则训练得到 $Q(s,a;\theta) $.</p>
+</li>
+<li><p>replay memory 就是前面模拟流程里面得到的四元组 $e_t = (s_t, a_t, r_t, s_{t+1})$ 的集合$D$, 在训练的时候随机从该集合里采样训练CNN, 这样做有三个好处:</p>
+<blockquote>
+<ul>
+<li>一个样本可能被优化的多个迭代过程中被重复采样, 提高数据的使用率</li>
+<li>连续采样的样本序列有很强的相关性, 随机采样可以打破这种相关性, 使训练更有效</li>
+<li>如果用连续的样本序列进行训练, 这个模型往往会重复做出相同的最优决策, 比如说当前的最优action是往左, 那么接下来几个action也很有可能选择往左. 这样子求解很有可能陷入局部最优解, 甚至不收敛.</li>
+</ul>
+</blockquote>
+</li>
+<li><p>整个算法的流程如图所示:<br><img src="/resource/notes-on-atari/1.png" alt="img"><br>简要复述为:</p>
+<blockquote>
+<ul>
+<li>初始化replay memory集合$D$, 初始化两个CNN模型的估计函数, $Q$ 和 $\hat{Q}$, 前者用来估计当前的值, 后者用来估计下一个状态的值(上文有提及, 即$Q(s,a;\theta^-)$)</li>
+<li>对于每一个episode的每一个时间阶段t, 根据$\epsilon$ greedy 选择 $a_t$, (episode和 $\epsilon$ greedy定义参考上面RL基本概念), 得到收益 $r_t$ 和下一个状态 $s_{t+1}$</li>
+<li>将序列$ (\phi_t, a_t, r_t, \phi_{t+1})$ 储存到 $D$, </li>
+<li>随机从 $D$ 中采样出minibatch, 定义groundtruth $y_j$, 根据前面定义的损失函数更新CNN<br>的参数.</li>
+<li>每隔一段时间设置 $\hat{Q} = Q$</li>
+</ul>
+</blockquote>
+</li>
+</ul>
 
       
     </div>
@@ -301,7 +332,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/linux-vim/"> #linux,vim </a>
+            <a href="/tags/RL/"> #RL </a>
           
         </div>
       
@@ -310,13 +341,11 @@
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/11/18/notes-on-atari/">论文笔记 Human-Level control through deep reinforcement learning</a>
-            
           </div>
 
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/06/15/notes-on-deep-compression/">论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding</a>
+              <a href="/2016/07/15/vim/">vim 插件快速配置及配置文件下载(含教程)</a>
             
           </div>
         </div>
@@ -333,7 +362,7 @@
       <div class="comments" id="comments">
         
 
-<div class="ds-share" data-thread-key="2016/07/15/vim/" data-title="vim 插件快速配置及配置文件下载(含教程)" data-images="http://yoursite.com/2016/07/15/vim/" data-content="http://yoursite.com/2016/07/15/vim/" data-url="http://yoursite.com/2016/07/15/vim/">
+<div class="ds-share" data-thread-key="2016/11/18/notes-on-atari/" data-title="论文笔记 Human-Level control through deep reinforcement learning" data-images="http://yoursite.com/2016/11/18/notes-on-atari/" data-content="http://yoursite.com/2016/11/18/notes-on-atari/" data-url="http://yoursite.com/2016/11/18/notes-on-atari/">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
         <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
@@ -347,8 +376,8 @@
  </div>
 
           <!-- 评论框 -->
-          <div class="ds-thread" data-thread-key="2016/07/15/vim/"
-               data-title="vim 插件快速配置及配置文件下载(含教程)" data-url="http://yoursite.com/2016/07/15/vim/">
+          <div class="ds-thread" data-thread-key="2016/11/18/notes-on-atari/"
+               data-title="论文笔记 Human-Level control through deep reinforcement learning" data-url="http://yoursite.com/2016/11/18/notes-on-atari/">
           </div>
         
       </div>
@@ -435,7 +464,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用步骤"><span class="nav-text">使用步骤:</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Reinforcement-learning-基本概念"><span class="nav-text">Reinforcement learning 基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模拟流程"><span class="nav-text">模拟流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Atari-游戏场景代入reinforcement-learning-模型"><span class="nav-text">Atari 游戏场景代入reinforcement learning 模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#输入"><span class="nav-text">输入:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#reward-r-的定义"><span class="nav-text">reward $r$ 的定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#actions集合"><span class="nav-text">actions集合</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reinforcement-learning-算法"><span class="nav-text">Reinforcement learning 算法</span></a></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
