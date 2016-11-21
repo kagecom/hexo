@@ -223,7 +223,7 @@
         <p>本文是AlphaGo实现的论文，发表在nature上面，先贴出链接：<br><a href="http://www.nature.com/nature/journal/v529/n7587/abs/nature16961.html" target="_blank" rel="external">http://www.nature.com/nature/journal/v529/n7587/abs/nature16961.html</a><br>笔者仔细研读了论文之后，将自己的笔记汇聚于此，希望做为一个详解，解读一下AlphaGo背后的细节和原理。</p>
 <a id="more"></a>
 <hr>
-<h2 id="input-feature"><a href="#input-feature" class="headerlink" title="input feature"></a>input feature</h2><p>![img][/resource/alphago/1.jpg]</p>
+<h2 id="input-feature"><a href="#input-feature" class="headerlink" title="input feature"></a>input feature</h2><p><img src="/resource/alphago/1.jpg" alt="input feature"></p>
 <ul>
 <li>stone colour: 该位置上是否有我方棋子/敌方棋子/空</li>
 <li>Turns since： 该位置上的棋子是在距现在几步棋子下的，比如上一步敌方走的棋子就是距离1，上上一步我方自己走的就是距离2.</li>
@@ -242,7 +242,7 @@
 <ul>
 <li>此公式参考David silver 的 Reinforcement Learning - An Introduction(Second edition, Draft) 一书<br>Chapter13: Policy Gradient Methods, section 13.3: REINFORCE: Monte Carlo Policy Gradient, </li>
 <li>附上百度云下载链接 : <a href="http://pan.baidu.com/s/1eSDRe1c" target="_blank" rel="external">http://pan.baidu.com/s/1eSDRe1c</a> 密码: qy5j</li>
-<li>另外, 给出该算法流程的截图如下:<br>![img][/resource/alphago/2.jpg]</li>
+<li>另外, 给出该算法流程的截图如下:<br><img src="/resource/alphago/2.jpg" alt="algorithm1"></li>
 </ul>
 </blockquote>
 <p>论文中做到利用此RL的模型, 跟上面SL的模型对弈, 能赢下80%以上的比赛.<br>这一训练过程在50个GPU上训练了一天。</p>
@@ -254,7 +254,7 @@
 </ul>
 </blockquote>
 <p>这一训练过程在50个GPU训练五千万个batches，每个batch有32个棋局，花了一个星期。</p>
-<h2 id="Monte-Carlo-tree-searching-with-policy-and-value-networks"><a href="#Monte-Carlo-tree-searching-with-policy-and-value-networks" class="headerlink" title="Monte Carlo tree searching with policy and value networks"></a>Monte Carlo tree searching with policy and value networks</h2><p>![img][/resource/alphago/3.jpg]<br>先总的说一下 MCTS 的原理：</p>
+<h2 id="Monte-Carlo-tree-searching-with-policy-and-value-networks"><a href="#Monte-Carlo-tree-searching-with-policy-and-value-networks" class="headerlink" title="Monte Carlo tree searching with policy and value networks"></a>Monte Carlo tree searching with policy and value networks</h2><p><img src="/resource/alphago/3.jpg" alt="MCTS"><br>先总的说一下 MCTS 的原理：</p>
 <blockquote>
 <ol>
 <li>如上图a所示，每一次模拟都遍历整棵树，跟据贪婪法则，选择最优的 $Q+u(P)$ 值的边，直到叶子结点</li>
