@@ -10,7 +10,7 @@
 <meta http-equiv=”Cache-Control” content=”no-siteapp” />
 
 
-  <meta name="keywords" content=" ,deeplearning, " />
+  <meta name="keywords" content=" ,RL, " />
 
 
 
@@ -49,7 +49,7 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.2" />
 
 
-  <title> 论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <title> Alphago详解 论文笔记 Mastering the game of Go with deep neural networks and tree search - 陈纪凯的博客 </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </head>
 
 <body>
@@ -188,7 +188,7 @@
           
           
             
-              论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding
+              Alphago详解 论文笔记 Mastering the game of Go with deep neural networks and tree search
             
           
         </h1>
@@ -196,7 +196,7 @@
 
       <div class="post-meta">
         <span class="post-time">
-          发表于 2016-06-15
+          发表于 2016-11-21
         </span>
 
         
@@ -205,8 +205,8 @@
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2016/06/15/notes-on-deep-compression/#comments" >
-              <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/15/notes-on-deep-compression/"></span>
+            <a href="/2016/11/21/alphago/#comments" >
+              <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/21/alphago/"></span>
             </a>
           </span>
           
@@ -220,35 +220,71 @@
       
 
       
-        <p>本文是ICLR 2016的best paper，链接如下：<a href="http://arxiv.org/abs/1510.00149" target="_blank" rel="external">http://arxiv.org/abs/1510.00149</a></p>
-<p>本文基于Song Han的前一篇paper： <a href="http://arxiv.org/abs/1506.02626" target="_blank" rel="external">Learning both weights and connections for efficient neural networks</a>, <strong><em>在不损失模型准确度的情况下</em></strong>， alexnet模型的压缩比从原来的9倍增加到35倍，VGG-16模型的压缩比从原来的13倍增加到49倍，使得将模型植入到微型的嵌入式设备变得可能。同时，运行速度快了3到4倍，能耗下降比为3到7倍。<br><a id="more"></a></p>
+        <p>本文是AlphaGo实现的论文，发表在nature上面，先贴出链接：<br><a href="http://www.nature.com/nature/journal/v529/n7587/abs/nature16961.html" target="_blank" rel="external">http://www.nature.com/nature/journal/v529/n7587/abs/nature16961.html</a><br>笔者仔细研读了论文之后，将自己的笔记汇聚于此，希望做为一个详解，解读一下AlphaGo背后的细节和原理。</p>
+<a id="more"></a>
 <hr>
-<p>压缩过程分成了3步，如下图:<br><img src="/resource/notes-on-deep-compression/1.jpg" alt="img"></p>
-<h2 id="1-剪枝"><a href="#1-剪枝" class="headerlink" title="1.剪枝"></a>1.剪枝</h2><p>剪枝即是<a href="http://arxiv.org/abs/1506.02626" target="_blank" rel="external">Learning both weights and connections for efficient neural networks</a>论文里的做法，剪枝后的参数矩阵将变成稀疏矩阵，采用compressed sparse row (CSR) or compressed sparse column (CSC) 的方式存储这些权值。<br>CSR 和 CSC 的存储方式参考Wiki百科的内容，<a href="https://en.wikipedia.org/wiki/Sparse_matrix" target="_blank" rel="external">https://en.wikipedia.org/wiki/Sparse_matrix</a> 这里转述该词条的例子如下：</p>
-<p><img src="/resource/notes-on-deep-compression/2.jpg" alt="img"></p>
+<h2 id="input-feature"><a href="#input-feature" class="headerlink" title="input feature"></a>input feature</h2><p>![input feature][/resource/alphago/1.jpg]</p>
 <ul>
-<li>$A$数组存储矩阵里的非0元素（按行顺序）</li>
-<li>$IA(i) = $ 截止到第$i$行非0元素的个数，$i$从第0开始，因此$IA(0) 一定是0$，此例中，$IA(1) = 0$，第一行没有非0元素。</li>
-<li>JA数组存储每一个非0元素所在的列号。</li>
-<li><p>因此总共需要$2a+n+1$个数据，其中$a$为非零元素的个数，$n$是行数或列数。</p>
-<p> 另外，为了进一步压缩，在$JA$数组中存储位置的差分，即该位置距离上一个数据的距离，这普遍存在在很多压缩算法中。对于conv层，每个数据的差分项用8 bits存储，fc层则使用5 bits.它们分别只能代表1~256，和1~32,则当差距超过这个范围时，则在最后的位置补一个0，如图所示：</p>
-</li>
+<li>stone colour: 该位置上是否有我方棋子/敌方棋子/空</li>
+<li>Turns since： 该位置上的棋子是在距现在几步棋子下的，比如上一步敌方走的棋子就是距离1，上上一步我方自己走的就是距离2.</li>
+<li>Liberities after move： 走了这步棋之后的气（围棋术语），用8个plane表示，1表示气为1,2表示气为2，… 8 表示气为8以上。</li>
+<li>capture size: 表示能够吃对方多少个子</li>
+<li>self-atari size：表示会被敌方吃多少个子</li>
+<li>其他几个为围棋术语，</li>
+<li>player color：目前下棋的是否为黑子</li>
 </ul>
-<p><img src="/resource/notes-on-deep-compression/3.jpg" alt="img"></p>
-<h2 id="2-量化与权值共享"><a href="#2-量化与权值共享" class="headerlink" title="2.量化与权值共享"></a>2.量化与权值共享</h2><p>这个步骤相当于k-means聚类，将网络的参数聚类成若干个权值，再用索引记录该权值。<br>对于CONV卷积层，论文中用8 bits索引一个权值（所以，总共有256个共享权值，即聚类中心），而对于FC全连接层，则使用5bits。作者通过这个方法，在AlexNet上能做到准确度完全不降。<br>这样该步骤能做到的压缩率为<br>$$r=\frac{nb}{nlog_2(k)+kb}$$<br>其中 $n$ 为连接权值的个数，$k$ 是聚类个数，代表某个聚类则需使用 $log_2(k)$ 个bits，每个权值用 $b$ 个bits表示。<br>文中给了一个例子，不同颜色表示不同的聚类，反向传播的时候也是如此。<br><img src="/resource/notes-on-deep-compression/4.jpg" alt="img"></p>
-<h3 id="聚类中心初始化"><a href="#聚类中心初始化" class="headerlink" title="聚类中心初始化"></a>聚类中心初始化</h3><p>聚类中心的初始化会影响聚类的效果，进而影响神经网络预测的准确度。</p>
+<h2 id="Supervised-learning-of-policy-networks"><a href="#Supervised-learning-of-policy-networks" class="headerlink" title="Supervised learning of policy networks"></a>Supervised learning of policy networks</h2><p>Supervised learning of policy networks (SL), 就是先利用有监督的信息, 即事先收集的大量棋手们博弈过的棋局(KGS go sever 中上等级的棋手), 即 state-action pairs, 再运用CNN(卷积神经网络)训练预测 $p_\sigma(a|s)$ 的概率分布, 该模型的输入 $s$ 是棋局的一些信息, CNN最后的 softmax 层直接输出所有有效action的概率分布.</p>
+<p>该训练过程使用了三千万有监督的样本, 在只使用棋局位置信息和历史走棋信息的情况下, 准确率达到了55.7%, 而在使用额外使用其他输入特征的时候, 准确率达到了57.0%. 文中提到, 准确率小幅的提高能使 AlphaGo 的胜率大幅提高.</p>
+<p>这一训练过程在50个GPU上训练了3.4亿步，总共花了<strong>3个星期</strong>。</p>
+<p>训练得到的CNN在预测一次走棋的时候需要 3ms 的时间, 很慢.<br>为了提高速度, 论文训练了一个快速的模型, $p_\pi(a|s)$ 预测的时候只需要 2us, 但是准确率只有24.2%. $p_\pi(a|s)$用来做rollout的打分, 即快速对弈直到分出胜负, 同时给出分数.</p>
+<h2 id="Reinforcement-learning-of-policy-networks"><a href="#Reinforcement-learning-of-policy-networks" class="headerlink" title="Reinforcement learning of policy networks"></a>Reinforcement learning of policy networks</h2><p>Reinforcement learning of policy networks (RL), 增强学习的模型跟上面SL的一样, 符号定义为 $p_\rho(a|s)$, 用前面SL的网络参数初始化. 通俗地说, 就是让前面 sl 学习到的模型自己跟自己对弈, 逐步学习.<br>实现上就是用当前的模型 $\rho$ 跟前面几次优化的模型 $\rho^-$ 对弈.<br>定义reward为:<br>$$r_t=<br>\begin{cases}<br>1&amp; 赢 \land t 到达终止状态 T\\<br>0&amp; 其它非终止状态\\<br>-1&amp; 输\land  t 到达终止状态 T<br>\end{cases}$$<br>定义 $z_t$ 为棋局结束时的reward<br>$$z_t = \pm r(s_T) $$<br>根据梯度下降法, 该网络的更新法则为:<br>$$\Delta\rho \propto \frac{\partial \text{log} p_\rho(a_t|s_t)}{\partial \rho} z_t$$</p>
+<blockquote>
 <ul>
-<li>随机初始化(Forgy initialization)：即随机选择ｋ个权值进行初始化。（蓝色点表示，集中在两个概率密度的尖峰）</li>
-<li>密度线性初始化(Density-based initialization )：在累积概率分布等间距取样ｋ个，找到相对应的初始化值进行初始化。（绿色点表示，比随机初始化更加集中）  </li>
-<li>线性初始化(Linear initialization)：在权值的分布范围内等间距选择ｋ个权值来初始化。（红色点表示）</li>
+<li>此公式参考David silver 的 Reinforcement Learning - An Introduction(Second edition, Draft) 一书<br>Chapter13: Policy Gradient Methods, section 13.3: REINFORCE: Monte Carlo Policy Gradient, </li>
+<li>附上百度云下载链接 : <a href="http://pan.baidu.com/s/1eSDRe1c" target="_blank" rel="external">http://pan.baidu.com/s/1eSDRe1c</a> 密码: qy5j</li>
+<li>另外, 给出该算法流程的截图如下:<br>![algorithm1][/resource/alphago/2.jpg]</li>
 </ul>
-<p><img src="/resource/notes-on-deep-compression/5.jpg" alt="img"></p>
-<pre><code>有论文指出，数值大的权值在神经网络中起的作用很大，但是这些大权值所占在比例少.
-因此，对于Forgy initialization和Density-based initialization 更难表示好这些大权值。
-实验结果也比较了这三种初始化方法的差异并证实了该论点。如图：
-</code></pre><p><img src="/resource/notes-on-deep-compression/6.jpg" alt="img"><br>     在压缩比一样的情况下，线性初始化跑出的结果略高于前两种初始化方式。</p>
-<h2 id="3-Huffman-编码"><a href="#3-Huffman-编码" class="headerlink" title="3.Huffman 编码"></a>3.Huffman 编码</h2><p>即Winzip，把上述压缩后的模型再用huffman压一遍。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文最大的贡献就是在不损失精度的情况下压缩网络，使得模型植入嵌主式系统变得可能，同时加快了运算速度，降低能耗。</p>
+</blockquote>
+<p>论文中做到利用此RL的模型, 跟上面SL的模型对弈, 能赢下80%以上的比赛.<br>这一训练过程在50个GPU上训练了一天。</p>
+<h2 id="Reinforcement-learning-of-value-networks"><a href="#Reinforcement-learning-of-value-networks" class="headerlink" title="Reinforcement learning of value networks"></a>Reinforcement learning of value networks</h2><p>价值网络, 这个网络根据棋局状态直解预测它的期望收益 $z_t$ :<br>$$v^p(s)=E[z_t | s_t = s, a_{t \dots T} \sim p]$$<br>训练的时候直接采用 RL 的网络 $p_\rho $ 生成的 state-outcome pairs $(s,z)$ 作为训练样本, 直接做回归, 损失函数采用平方误差(MSE),<br>即 $(z-v_\theta(s))^2$, 对该式求导可得:<br>$$\Delta\theta \propto \frac{\partial v_\theta(s)}{\partial \theta} (z - v_\theta(s))$$</p>
+<blockquote>
+<ul>
+<li>连续的棋局只有少数一两个棋子有差别, 它们具有很强的相关性, 训练的时候很容易出现过拟合, </li>
+<li>运用 RL 模型自我对弈的棋局生成3000万样本, 训练的时候随机从训练集中采样, 可有效减缓过拟合.</li>
+</ul>
+</blockquote>
+<p>这一训练过程在50个GPU训练五千万个batches，每个batch有32个棋局，花了一个星期。</p>
+<h2 id="Monte-Carlo-tree-searching-with-policy-and-value-networks"><a href="#Monte-Carlo-tree-searching-with-policy-and-value-networks" class="headerlink" title="Monte Carlo tree searching with policy and value networks"></a>Monte Carlo tree searching with policy and value networks</h2><p>![MCTS illustration][/resource/alphago/3.jpg]<br>先总的说一下 MCTS 的原理：</p>
+<blockquote>
+<ol>
+<li>如上图a所示，每一次模拟都遍历整棵树，跟据贪婪法则，选择最优的 $Q+u(P)$ 值的边，直到叶子结点</li>
+<li>如上图b所示，叶子结点有可能会被扩展 (expanded)，图b左下角多了一个新的棋局状态，并初始化统计量，将 $p_\sigma$ 置为先验概率 $P$</li>
+<li>如上图c所示，在每一次模拟的最后，用value networks $v_\theta$和 rollout policy $p_\pi$估计它的价值 $r$</li>
+<li>如上图d所示，根据上面计算的值，更新相关的统计量。</li>
+</ol>
+</blockquote>
+<p> <strong>随着模拟次数的逐渐增多，MCTS也会变得越来越大，估计值也会越来越准确，policy也会越来越好。</strong></p>
+<hr>
+<p>下面具体 MCTS 方法及其各个步骤：<br>搜索树的每个状态是 $s$，它包含了所有合法走法 $(s,a)$，每条边包含如下的一些统计量：<br>$$ P(s,a), N_v(s,a), N_r(s,a), W_v(s,a), W_r(s,a), Q(s,a)$$<br>$P(s,a)$ 是局面 $s$ 下走 $a$ 的先验概率。$W_v(s,a)$ 是 MC 估计的 value network的打分总和，$W_r(s,a)$ 是 MC 估计的 rollout 的打分总和。$N_v(s,a)$ 和 $N_r(s,a)$ 分别是 simulation 时 value network 和 rollout 经过边 $(s,a)$ 的次数。$Q(s,a)$ 是最终融合了value network打分和rollout打分 (上文快速的SL网络 $p_\pi$) 的最终得分。</p>
+<h3 id="search"><a href="#search" class="headerlink" title="search"></a>search</h3><p>$$a_t = argmax_a( Q(s_t, a) + u(s_t, a))$$<br>从根结点(当前棋局)开始按照上面的规则选择下一步的走棋, 直到叶子结点,<br>上面 $Q(s_t, a)$ 是对当前 $(s,a)$ 的价值估计, 属于exploitaion<br>$u(s_t, a)=c_{\text{puct}}P(s,a) \frac{\sqrt{\sum_bN_r(s,b)}}{1+N_r(s,a)}$, $P(s,a)=P_\sigma(a|s)$, 是前面 SL 模型预测的结果, 即先验概率, 也相当于 exploration.<br>当经过该边的次数 $N_r(s,a)$ 很小时, $u(s_t, a)$ 项较大, 该策略倾向于选择高先验概率的走棋.<br>随着次数越来越大, 该策略倾向于选择 $Q(s,a)$, 即action value较大的走棋.</p>
+<h3 id="evaluation"><a href="#evaluation" class="headerlink" title="evaluation"></a>evaluation</h3><p>到达叶子结点 $s_L$ 后, 先利用value networks评估 $v_\theta(s_L)$, 此计算过程交给一个专门负责的GPU操作队列.<br>同时利用快速的SL模型 $p_\pi$ 估计rollout分数. </p>
+<h3 id="Backup"><a href="#Backup" class="headerlink" title="Backup"></a>Backup</h3><p>在这一步骤中，要更新前面提到的统计量。<br>在simulation开始的时候, 先假设该状态的棋局已经输了 $n_{vl}$ 场棋局, 这样做的目的是改变 $N_r(s_t, a_t)$, 进而改变选择的 $a_t$, 从而防止多线程同时模拟同一个状态.<br>$$N_r(s_t, a_t) \gets N_r(s_t, a_t) + n_{vl} \\<br>W_r(s_t, a_t) \gets W_r(s_t, a_t) - n_{vl} $$<br>当模拟结束了，需要把这个virtual loss去掉，同时加上这次Simulation的得分<br>$$N_r(s_t, a_t) \gets N_r(s_t, a_t) - n_{vl} \\<br>W_r(s_t, a_t) \gets W_r(s_t, a_t) + n_{vl} + z_t$$<br>另一方面，在前面的evaluation计算完 $v_\theta(s_L)$ 后，更新相应的变量。<br>$$N_v(s_t, a_t) \gets N_v(s_t, a_t) + 1 \\<br>W_v(s_t, a_t) \gets W_v(s_t, a_t) + v_\theta(s_L)$$<br>最后得到action value的估计为：<br>$$Q(s,a) = (1-\lambda) \frac{W_v(s,a)}{N_v(s,a)} + \lambda \frac{W_r(s,a)}{N_r(s,a)}$$<br>上式 $\lambda$ 是权衡exploitation和exploration的参数，论文中试验了多组参数，发现 $\lambda=0.5$ 最好。</p>
+<h3 id="Expansion"><a href="#Expansion" class="headerlink" title="Expansion"></a>Expansion</h3><p>当一条边的访问次数大于某一阈值的时候，即 $N_r(s,a) &gt; n_{thr}$ 时，就会把它的下一代状态 $s^\prime = f(s,a)$ 加入到MC搜索树里面，并初始化它的统计量<br>$$N_v(s^\prime,a)=N_r(s^\prime,a)=W_v(s^\prime,a)=W_r(s^\prime,a)=0, P(s^\prime,a)=p_\sigma(a|s^\prime)$$<br>在计算 $P(s^\prime,a)=p_\sigma(a|s^\prime)$ 的时候相对耗时，因此先运用 $p_\tau(a|s^\prime)$ 来近似它（这是一个跟 快速rollout $p_\pi$类似的网络，但输入特征比 $p_\pi$ 多），等它计算好之后再替换回来。<br>注意：</p>
+<blockquote>
+<ul>
+<li>这里采用了SL的模型 $p_\sigma$ 来估计新生成结点的先验概率，而不是运用 RL 的模型 $p_\rho$，论文中提到这样的效果更好，可能原因是 $SL$ 是从人类有监督的数据训练的，更加注意于长期的全局策略，而 RL 则更加注重单独一步的最优。</li>
+<li>但是在训练value network的时候，$RL$ 的数据比 $SL$ 的好。</li>
+</ul>
+</blockquote>
+<hr>
+<ul>
+<li>最终版本的 AlphaGo 有40个搜索线程, 48个CPU, 8个GPU.</li>
+<li>同时也实现了分布式的 AlphaGo, 有40个搜索线程, 1202个CPU, 176个GPU.</li>
+</ul>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><ul>
+<li>讲解AlphaGo的另外一篇文章, 也是写得挺好, 本文也做了参考 <a href="http://news.zol.com.cn/572/5726879.html" target="_blank" rel="external">http://news.zol.com.cn/572/5726879.html</a></li>
+<li>David silver 的 Reinforcement Learning - An Introduction(Second edition, Draft).pdf 下载百度云链接: <a href="http://pan.baidu.com/s/1eSDRe1c" target="_blank" rel="external">http://pan.baidu.com/s/1eSDRe1c</a> 密码: qy5j</li>
+</ul>
 
       
     </div>
@@ -300,7 +336,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/deeplearning/"> #deeplearning </a>
+            <a href="/tags/RL/"> #RL </a>
           
         </div>
       
@@ -309,13 +345,11 @@
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/07/15/vim/">vim 插件快速配置及配置文件下载(含教程)</a>
-            
           </div>
 
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/06/05/notes-on-learing-weights-connections/">论文笔记 《Learning both weights and connections for efficient neural networks》</a>
+              <a href="/2016/11/18/notes-on-atari/">论文笔记 Human-Level control through deep reinforcement learning</a>
             
           </div>
         </div>
@@ -332,7 +366,7 @@
       <div class="comments" id="comments">
         
 
-<div class="ds-share" data-thread-key="2016/06/15/notes-on-deep-compression/" data-title="论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding" data-images="http://yoursite.com/2016/06/15/notes-on-deep-compression/" data-content="http://yoursite.com/2016/06/15/notes-on-deep-compression/" data-url="http://yoursite.com/2016/06/15/notes-on-deep-compression/">
+<div class="ds-share" data-thread-key="2016/11/21/alphago/" data-title="Alphago详解 论文笔记 Mastering the game of Go with deep neural networks and tree search" data-images="http://yoursite.com/2016/11/21/alphago/" data-content="http://yoursite.com/2016/11/21/alphago/" data-url="http://yoursite.com/2016/11/21/alphago/">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
         <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
@@ -346,8 +380,8 @@
  </div>
 
           <!-- 评论框 -->
-          <div class="ds-thread" data-thread-key="2016/06/15/notes-on-deep-compression/"
-               data-title="论文笔记 Deep Compression compressing deep neural networks with pruning, trained quantization and huffman coding" data-url="http://yoursite.com/2016/06/15/notes-on-deep-compression/">
+          <div class="ds-thread" data-thread-key="2016/11/21/alphago/"
+               data-title="Alphago详解 论文笔记 Mastering the game of Go with deep neural networks and tree search" data-url="http://yoursite.com/2016/11/21/alphago/">
           </div>
         
       </div>
@@ -434,7 +468,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-剪枝"><span class="nav-text">1.剪枝</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-量化与权值共享"><span class="nav-text">2.量化与权值共享</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#聚类中心初始化"><span class="nav-text">聚类中心初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Huffman-编码"><span class="nav-text">3.Huffman 编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#input-feature"><span class="nav-text">input feature</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Supervised-learning-of-policy-networks"><span class="nav-text">Supervised learning of policy networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reinforcement-learning-of-policy-networks"><span class="nav-text">Reinforcement learning of policy networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reinforcement-learning-of-value-networks"><span class="nav-text">Reinforcement learning of value networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Monte-Carlo-tree-searching-with-policy-and-value-networks"><span class="nav-text">Monte Carlo tree searching with policy and value networks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#search"><span class="nav-text">search</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#evaluation"><span class="nav-text">evaluation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Backup"><span class="nav-text">Backup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Expansion"><span class="nav-text">Expansion</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录"><span class="nav-text">附录</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
