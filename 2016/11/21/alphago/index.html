@@ -242,7 +242,7 @@
 <p>定义reward为:<br>$$r_t=<br>\begin{cases}<br>1&amp; 赢 \land t 到达终止状态 T\\<br>0&amp; 其它非终止状态\\<br>-1&amp; 输\land  t 到达终止状态 T<br>\end{cases}$$<br>定义 $z_t$ 为棋局结束时的reward<br>$$z_t = \pm r(s_T) $$<br>根据梯度下降法, 该网络的更新法则为:<br>$$\Delta\rho \propto \frac{\partial \text{log} p_\rho(a_t|s_t)}{\partial \rho} z_t$$</p>
 <blockquote>
 <ul>
-<li>此公式参考David silver 的 Reinforcement Learning - An Introduction(Second edition, Draft) 一书<br>Chapter13: Policy Gradient Methods, section 13.3: REINFORCE: Monte Carlo Policy Gradient, </li>
+<li>此公式参考Richard S. Sutton and Andrew G. Barto 的 Reinforcement Learning - An Introduction(Second edition, Draft) 一书<br>Chapter13: Policy Gradient Methods, section 13.3: REINFORCE: Monte Carlo Policy Gradient, </li>
 <li>附上百度云下载链接 : <a href="http://pan.baidu.com/s/1eSDRe1c" target="_blank" rel="external">http://pan.baidu.com/s/1eSDRe1c</a> 密码: qy5j</li>
 <li>另外, 给出该算法流程的截图如下:<br><img src="/resource/alphago/2.jpg" alt="algorithm1"></li>
 </ul>
